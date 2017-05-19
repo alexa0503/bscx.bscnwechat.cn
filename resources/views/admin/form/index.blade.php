@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 @section('content')
+@php
+$today = \Carbon\Carbon::today()->timestamp;
+@endphp
 <div class="smart-widget">
 	<div class="smart-widget-inner">
 		<div class="smart-widget-body">
@@ -11,10 +14,9 @@
 			        	<th>手机号</th>
 			        	<th>车牌号</th>
 			        	<th>店铺</th>
-			          	<th>是否获奖</th>
-			          	<th>是否预约</th>
 			          	<th>是否领奖</th>
 			          	<th>是否失效</th>
+			          	<th>更改预约次数</th>
 			          	<th>预约日期</th>
 			          	<th>机油</th>
 			          	<th>IP</th>
@@ -30,15 +32,19 @@
 						<td>{{$item->mobile}}</td>
 						<td>{{$item->plate_number}}</td>
 						<td><a href="{{route('shop.show',$item->id)}}" title="点击查看店铺详情">{{$item->shop->name}}</a></td>
-			          	<td>{{$item->lottery->is_winned == 1 ? '是' : '否'}}</td>
-			          	<td>{{$item->lottery->is_winned == 1 ? ($item->lottery->is_booked == 1 ? '是' : '否') : '--'}}</td>
 			          	<td>{{$item->lottery->is_winned == 1 ? ($item->lottery->is_received == 1 ? '是' : '否') : '--'}}</td>
 			          	<td>{{$item->lottery->is_winned == 1 ? ($item->lottery->is_invalid == 1 ? '是' : '否') : '--'}}</td>
-                        <td>{{$item->booking_date}}</td>
+                        <td>{{$item->alter_booking_num}}</td>
+						<td>{{$item->booking_date}}</td>
                         <td>{{$item->oil_info}}</td>
                         <td>{{$item->lottery->created_ip}}</td>
 			          	<td>{{$item->created_at}}</td>
-						<th><a href="{{route('form.edit',$item->id)}}" class="btn btn-default btn-sm">更改预约日期</a></th>
+						<th>
+							@if($item->lottery->is_invalid == 0 && strtotime($item->booking_date) < $today)
+							<a href="{{route('form.edit',$item->id)}}" class="btn btn-default btn-sm">更改预约日期</a>
+							@else
+							--
+							@endif</th>
 		        	</tr>
                     @endforeach
 		      	</tbody>

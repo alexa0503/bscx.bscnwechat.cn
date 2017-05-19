@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 
 class HomeController extends Controller
 {
@@ -24,7 +25,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if(Agent::isMobile()){
+        if(\Agent::isMobile()){
             return redirect('/h5/index.html');
         }
         else{
@@ -238,5 +239,44 @@ class HomeController extends Controller
         #总的有效奖数量
         $total_effective = $total_amount - $amount_received - $amount_written + $amount_failure;
         */
+    }
+    public function getWriteOff(Request $request,$id,$key)
+    {
+        $shop = \App\Shop::find($id);
+        $keyy = subStr(Crypt::encryptString($shop->contact_mobile),5,17);
+        //return $keyy;
+        if( null == $shop && $keyy == $key){
+            return view ('write-off');
+        }
+        else{
+            return view ('write-off');
+        }
+    }
+    public function postWriteOff(Request $request,$id,$key,$encryptedValue)
+    {
+        $result = Crypt::decrypt($encryptedValue);
+        //return view ('write-off-result');
+    }
+    public function getWriteOffResult(Request $request)
+    {
+
+    }
+    public function getCoupon(Request $request,$id,$key)
+    {
+        $form = \App\Form::find($id);
+        $keyy = subStr(Crypt::encryptString($shop->mobile),5,17);
+        if( null == $form && $keyy == $key){
+            //return view ('write-off');
+        }
+        else{
+            //return view ('write-off');
+        }
+        $result = [
+            'id' => $id,
+            'key' => $key,
+        ];
+        return view('coupon',[
+            'qrcode' => Crypt::encrypt($result),
+        ]);
     }
 }

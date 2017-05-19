@@ -42,7 +42,6 @@ class UpdateJackpot extends Command
         \DB::beginTransaction();
         try{
             #超过30分钟未填写的抽奖记录返还奖池
-            var_dump($now->toDateString());
             $count = \App\Lottery::where('is_winned',1)
                 ->where('created_at', '>=', $now->toDateString())
                 ->where('created_at', '<', $now->copy()->addDays(1)->toDateString())

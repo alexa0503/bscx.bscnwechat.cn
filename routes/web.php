@@ -18,6 +18,20 @@ Route::get('/shops/{type?}', 'HomeController@shops');
 Route::any('/form', 'HomeController@formPost');
 Route::get('/shop/{id}', 'HomeController@shop');
 Route::any('/lottery', 'HomeController@lottery');
+Route::get('/writeoff/{id}/{key}', 'HomeController@getWriteoff');
+Route::post('/writeoff', 'HomeController@postWriteoff');
+Route::get('/coupon/{id}/{key}', 'HomeController@getCoupon');
+Route::get('/booking/date',function(){
+    $today = \Carbon\Carbon::today();
+    //$date[] = $today->toDateString();
+    $date = [];
+    for ($i=0; $i < 15; $i++) {
+        $date[] = $today->addDays(1)->toDateString();
+    }
+    return $date;
+});
+
+
 
 Route::group(['middleware' => ['role:superadmin,global privileges','menu'],'prefix'=>'admin'], function () {
     Route::get('/', function () {
@@ -52,7 +66,6 @@ Route::get('/install', function(){
         $user->roles()->pluck('name');
         $user->givePermissionTo('global privileges');
     }
-
     return redirect('/login');
 });
 
