@@ -4,6 +4,8 @@
 /public/storage
 /public/h5
 /public/pc
+/public/qr
+/public/front
 /storage/*.key
 /vendor
 /.idea

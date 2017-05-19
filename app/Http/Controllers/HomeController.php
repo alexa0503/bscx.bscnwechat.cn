@@ -39,7 +39,8 @@ class HomeController extends Controller
         }
         $lottery_id = $request->session()->get('lottery.id');
         $lottery = \App\Lottery::find($lottery_id);
-        if( null == $lottery || $lottery->is_winned == 1 ){
+
+        if( null == $lottery || $lottery->is_winned != 1 ){
             return ['ret'=>1003,'msg'=>'您并没有中奖，无法填写信息~'];
         }
         elseif( $lottery->is_booked == 1 ){
@@ -58,7 +59,7 @@ class HomeController extends Controller
         ];
         $validator = \Validator::make($request->all(), [
             'name' => 'required',
-            'mobile' => 'required|numeric|max:11',
+            'mobile' => 'required|regex:/^1[0-9]{10}/',
             'plate_number' => 'required|max:20',
             'shop' => 'required',
             'oil_info' => 'required',
@@ -66,6 +67,10 @@ class HomeController extends Controller
         ], $messages);
         if ($validator->fails()) {
             return ['ret'=>1001,'msg'=>$validator->errors()->toArray()];
+        }
+        $count = \App\Form::where('mobile',$request->input('mobile'))->count();
+        if( $count > 0){
+            return ['ret'=>1002,'msg'=>['mobile'=>'手机号已存在']];
         }
         \DB::beginTransaction();
         try {
@@ -80,8 +85,24 @@ class HomeController extends Controller
             $form->save();
             $lottery->is_booked = 1;
             $lottery->save();
+            $shop = \App\Shop::find($form->shop_id);
+            //$form->province_name = $form->province->name;
+            //$form->city_name = $form->city->name;
+            //$form->area_name = $form->area->name;
+            $data = $form->toArray();
+            $data['shop_name'] = $shop->name;
+            $data['address'] = $shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address;
+            $file = 'qr/'.$form->id.'.svg';
+            $path = public_path($file);
+            $content = [
+                'id'=>$form->id,
+                'key'=>subStr(\Crypt::encryptString($form->mobile),5,17),
+            ];
+            \QrCode::generate(\Crypt::encrypt($content), $path);
+            $data['qr_code'] = url($file);
+            //发送短信
             \DB::commit();
-            return ['ret'=>0, 'msg'=>''];
+            return ['ret'=>0, 'msg'=>'','data'=>$data];
         } catch (Exception $e) {
             \DB::rollBack();
             return ['ret'=>1100, 'msg'=>$e->getMessage()];
@@ -131,13 +152,23 @@ class HomeController extends Controller
         $shop = \App\Shop::find($id);
         $shop->views += 1;
         $shop->save();
-        return $shop;
+        return ['ret'=>0,'data'=>$shop];
     }
     //抽奖
     public function lottery(Request $request)
     {
-        if( $request->session()->get('has_winned') == 1 ){
-            return ['ret'=>1002,'msg'=>'已中奖'];
+        if( $request->session()->get('has_winned') == 1){
+            $lottery = \App\Lottery::find($request->session()->get('lottery.id'));
+            $now = \Carbon\Carbon::now()->timestamp;
+            $invalid_at = $lottery->created_at->addMinutes(30)->timestamp;
+
+            if( $lottery->is_booked == 1){
+                $request->session()->put('has_winned', null);
+                $request->session()->put('lottery.id', null);
+            }
+            elseif( $now < $invalid_at){
+                return ['ret'=>0,'msg'=>'恭喜'];
+            }
         }
 
         $now = \Carbon\Carbon::now();
@@ -150,10 +181,10 @@ class HomeController extends Controller
                 $return = ['ret'=>1001,'msg'=>'未中奖'];
             }
             elseif( $total_setting->max_num <= $total_setting->winned_num ){
-                $return = ['ret'=>1001,'msg'=>'未中奖'];
+                $return = ['ret'=>1002,'msg'=>'未中奖'];
             }
             elseif( $today_setting->max_num <= $today_setting->winned_num ){
-                $return = ['ret'=>1001,'msg'=>'未中奖'];
+                $return = ['ret'=>1003,'msg'=>'未中奖'];
             }
             else{
                 $seed = ceil(10000/$today_setting->winning_odds);
@@ -166,8 +197,8 @@ class HomeController extends Controller
                 $lottery->save();
 
                 if( $rand1 == $rand2 ){
-                    $request->session()->set('has_winned', 1);
-                    $request->session()->set('lottery.id', $lottery->id);
+                    $request->session()->put('has_winned', 1);
+                    $request->session()->put('lottery.id', $lottery->id);
                     //奖项中奖数量自增1
                     $total_setting->winned_num += 1;
                     $total_setting->save();
@@ -177,13 +208,13 @@ class HomeController extends Controller
                     $return = ['ret'=>0,'msg'=>'恭喜'];
                 }
                 else{
-                    $return = ['ret'=>1001,'msg'=>'未中奖'];
+                    $return = ['ret'=>1004,'msg'=>'未中奖'];
                 }
             }
             \DB::commit();
         } catch (Exception $e) {
             \DB::rollBack();
-            $return = ['ret'=>1001, 'msg'=>$e->getMessage()];
+            $return = ['ret'=>1005, 'msg'=>$e->getMessage()];
         }
         return $return;
         /*
@@ -264,7 +295,7 @@ class HomeController extends Controller
     public function getCoupon(Request $request,$id,$key)
     {
         $form = \App\Form::find($id);
-        $keyy = subStr(Crypt::encryptString($shop->mobile),5,17);
+        $keyy = subStr(\Crypt::encryptString($shop->mobile),5,17);
         if( null == $form && $keyy == $key){
             //return view ('write-off');
         }
@@ -276,7 +307,7 @@ class HomeController extends Controller
             'key' => $key,
         ];
         return view('coupon',[
-            'qrcode' => Crypt::encrypt($result),
+            'qrcode' => \Crypt::encrypt($result),
         ]);
     }
 }
