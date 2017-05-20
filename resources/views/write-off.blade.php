@@ -35,7 +35,7 @@
     <div class="abs" ></div>
     <div class="abs txt black"  style="top: 347px;">
         <div>核销</div>
-        <div class="line"></div>
+        <div class="line">{{$shop->name}}</div>
         <button id="scan">核销</button>
     </div>
 </div>
@@ -52,12 +52,10 @@ $().ready(function(){
                 success: function (res) {
                     var result = res.resultStr; // 当needResult 为 1 时，扫码返回的结果
                     var url = '{{url("/writeoff")}}';
-                    var key = '{{Request::segment(2)}}';
-                    var shop_id = '{{Request::segment(3)}}';
-                    $('.line').html(url+'{shop_id:'+shop_id+',key:'+key+',result:'+result+'}')
-                    /*
+                    var key = '{{Request::segment(3)}}';
+                    var shop_id = '{{Request::segment(2)}}';
+                    //$('.line').html(url+'{shop_id:'+shop_id+',key:'+key+',result:'+result+'}')
                     $.post(url,{shop_id:shop_id,key:key,result:result},function(json){
-                        alert(json);
                         if(json){
                             location.href = '{{url("/result")}}';
                         }
@@ -65,7 +63,7 @@ $().ready(function(){
                             alert('扫描失败，请刷新页面重新扫描~')
                         }
                     });
-                    */
+
                 }
             });
         });

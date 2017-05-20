@@ -303,7 +303,9 @@ class HomeController extends Controller
             return 'invalid  url';
         }
         else{
-            return view ('write-off');
+            return view ('write-off',[
+                'shop' => $shop
+            ]);
         }
     }
     public function postWriteOff(Request $request)
