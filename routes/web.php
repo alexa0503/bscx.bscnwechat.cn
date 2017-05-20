@@ -18,8 +18,10 @@ Route::get('/shops/{type?}', 'HomeController@shops');
 Route::any('/form', 'HomeController@formPost');
 Route::get('/shop/{id}', 'HomeController@shop');
 Route::any('/lottery', 'HomeController@lottery');
+Route::get('/flow/{id}/{key}', 'HomeController@getFlow');
 Route::get('/writeoff/{id}/{key}', 'HomeController@getWriteoff');
 Route::post('/writeoff', 'HomeController@postWriteoff');
+Route::get('/result', 'HomeController@getWriteOffResult');
 Route::get('/coupon/{id}/{key}', 'HomeController@getCoupon');
 Route::get('/booking/date',function(){
     $today = \Carbon\Carbon::today();
@@ -29,6 +31,17 @@ Route::get('/booking/date',function(){
         $date[] = $today->addDays(1)->toDateString();
     }
     return $date;
+});
+Route::get('/test/qr/{id}', function($id){
+    $form = \App\Form::find($id);
+    if( $form == null ){
+        return 'no form';
+    }
+    $file = 'qr/'.$form->id.'.svg';
+    $path = public_path($file);
+    $content = url('/coupon',['id'=>$form->id,'key'=>subStr(md5($form->mobile),5,17)]);
+    \QrCode::size(600)->margin(0)->generate($content, $path);
+    return $content;
 });
 
 

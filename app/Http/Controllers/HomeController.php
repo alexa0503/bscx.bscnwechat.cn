@@ -86,19 +86,15 @@ class HomeController extends Controller
             $lottery->is_booked = 1;
             $lottery->save();
             $shop = \App\Shop::find($form->shop_id);
-            //$form->province_name = $form->province->name;
-            //$form->city_name = $form->city->name;
-            //$form->area_name = $form->area->name;
+
             $data = $form->toArray();
             $data['shop_name'] = $shop->name;
             $data['address'] = $shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address;
+
             $file = 'qr/'.$form->id.'.svg';
             $path = public_path($file);
-            $content = [
-                'id'=>$form->id,
-                'key'=>subStr(\Crypt::encryptString($form->mobile),5,17),
-            ];
-            \QrCode::generate(\Crypt::encrypt($content), $path);
+            $content = url('/coupon',['id'=>$form->id,'key'=>subStr(md5($form->mobile),5,17)]);
+            \QrCode::size(600)->margin(0)->generate($content, $path);
             $data['qr_code'] = url($file);
             //发送短信
             \DB::commit();
@@ -274,32 +270,76 @@ class HomeController extends Controller
     public function getWriteOff(Request $request,$id,$key)
     {
         $shop = \App\Shop::find($id);
-        $keyy = subStr(Crypt::encryptString($shop->contact_mobile),5,17);
-        //return $keyy;
-        if( null == $shop && $keyy == $key){
-            return view ('write-off');
+        if( null == $shop){
+            return 'invalid  url';
+        }
+        $keyy = subStr(md5($shop->contact_mobile),5,17);
+        if( $keyy != $key){
+            return 'invalid  url';
         }
         else{
             return view ('write-off');
         }
     }
-    public function postWriteOff(Request $request,$id,$key,$encryptedValue)
+    public function postWriteOff(Request $request)
     {
-        $result = Crypt::decrypt($encryptedValue);
+        try {
+            $shop_id = $request->input('shop_id');
+            $key = $request->input('key');
+            $result = Crypt::decrypt($request->input('result'));
+        } catch (Exception $e) {
+            \Session::flash('hx_class','hx_fault');
+            \Session::flash('hx_msg','解密失败，无效的 url~');
+            return ['ret'=>1001];
+        }
+
+        $form = \App\Form::find($result->id);
+        $today = \Carbon\Carbon::today();
+        if( null == $form ){
+            \Session::flash('hx_class','hx_fault');
+            \Session::flash('hx_msg','1100');//店铺不匹配
+            return ['ret'=>1100];
+        }elseif( $form->shop_id != $shop_id ){
+            \Session::flash('hx_class','hx_fault');
+            \Session::flash('hx_msg','1002');//店铺不匹配
+            $address = $form->shop->province->name.' '.$form->shop->city->name.' '.$form->shop->area->name.' '.$form->shop->address;
+            \Session::flash('hx_address', $address);
+            return ['ret'=>1002];
+        }elseif( $form->lottery->is_received == 1){
+            \Session::flash('hx_class','hx_fault');
+            \Session::flash('hx_msg','1003');//此二维码已核销
+            return ['ret'=>1003];
+        }
+        elseif( $form->booking_date != $today){
+            \Session::flash('hx_class','hx_fault');
+            \Session::flash('hx_msg','1004');//预约时间不符
+            \Session::flash('hx_booking_date',$form->booking_date);
+            return ['ret'=>1004];
+        }
+        elseif( $form->is_invalid == 1){
+            \Session::flash('hx_class','hx_fault');
+            \Session::flash('hx_msg','1005');//该领奖券已经失效
+            return ['ret'=>1005];
+        }
+        else{
+            $form->is_received = 1;
+            $form->save();
+            \Session::flash('hx_class','hx_success');
+            \Session::flash('hx_msg','0');
+            return ['ret'=>0];
+        }
         //return view ('write-off-result');
     }
     public function getWriteOffResult(Request $request)
     {
-
+        return view('write-off-result');
     }
     public function getCoupon(Request $request,$id,$key)
     {
         $form = \App\Form::find($id);
-        $keyy = subStr(\Crypt::encryptString($shop->mobile),5,17);
+        $keyy = subStr(md5($form->mobile),5,17);
         if( null == $form && $keyy == $key){
-            //return view ('write-off');
-        }
-        else{
+            return 'invalid url';
             //return view ('write-off');
         }
         $result = [
@@ -307,7 +347,25 @@ class HomeController extends Controller
             'key' => $key,
         ];
         return view('coupon',[
-            'qrcode' => \Crypt::encrypt($result),
+            'result' => \Crypt::encrypt($result),
+        ]);
+    }
+    public function getFlow(Request $request, $id, $key)
+    {
+        $shop = \App\Shop::find($id);
+        if( null == $shop){
+            return 'invalid  url';
+        }
+        $keyy = subStr(md5($shop->contact_mobile),5,17);
+        if( $keyy != $key){
+            return 'invalid  url';
+        }
+        $url = url('/writeoff',[
+            'id' => $id,
+            'key' => $keyy,
+        ]);
+        return view('flow',[
+            'url' => $url,
         ]);
     }
 }

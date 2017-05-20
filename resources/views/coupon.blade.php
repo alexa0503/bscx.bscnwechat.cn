@@ -32,6 +32,6 @@
 
 </head>
 <body>
-    {!! QrCode::size(400)->margin(0)->generate($qrcode); !!}
+    {!! QrCode::size(600)->margin(0)->generate($result); !!}
 </body>
 </html>

@@ -1,0 +1,1 @@
+function main(){var n=new Swiper(".swiper-container",{pagination:".swiper-pagination",paginationClickable:true});$(".btn_view").click(function(){$(".page1").fadeOut()});$(".btn_back").click(function(){$(".page1").fadeIn(function(){n.slideTo(0,0)});console.log(n)})}main.prototype.constructor=main;function init(){new main}
