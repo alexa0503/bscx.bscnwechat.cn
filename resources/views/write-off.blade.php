@@ -36,24 +36,25 @@
     <div class="abs txt black"  style="top: 347px;">
         <div>核销</div>
         <div class="line"></div>
-        <button id="scan">点我扫码</button>
+        <button id="scan">核销</button>
     </div>
 </div>
 <script src="{{asset('js/jquery-2.1.1.min.js')}}"></script>
 <script src="//res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 <script type="text/javascript" charset="utf-8">
-    wx.config({!! \EasyWeChat::js()->config(array('scanQRCode'), true); !!});
-wx.ready(function(){
+    wx.config({!! \EasyWeChat::js()->config(array('scanQRCode'), false); !!});
+$().ready(function(){
     wx.ready(function(){
         $('#scan').on('click', function () {
             wx.scanQRCode({
-                needResult: 0, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
+                needResult: 1, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
                 scanType: ["qrCode","barCode"], // 可以指定扫二维码还是一维码，默认二者都有
                 success: function (res) {
                     var result = res.resultStr; // 当needResult 为 1 时，扫码返回的结果
                     var url = '{{url("/writeoff")}}';
                     var key = '{{Request::segment(2)}}';
                     var shop_id = '{{Request::segment(3)}}';
+                    alert(url);
                     $.post(url,{shop_id:shop_id,key:key,result:result},function(json){
                         if(json){
                             location.href = '{{url("/result")}}';
@@ -61,8 +62,6 @@ wx.ready(function(){
                         else{
                             alert('扫描失败，请刷新页面重新扫描~')
                         }
-                    },"JSON").fail(function(){
-                        alert('扫描失败，请刷新页面重新扫描~')
                     });
                 }
             });

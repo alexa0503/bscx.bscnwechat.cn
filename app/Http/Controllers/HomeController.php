@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class HomeController extends Controller
 {
@@ -310,8 +311,8 @@ class HomeController extends Controller
         try {
             $shop_id = $request->input('shop_id');
             $key = $request->input('key');
-            $result = Crypt::decrypt($request->input('result'));
-        } catch (Exception $e) {
+            $result = decrypt($request->input('result'));
+        } catch (DecryptException $e) {
             \Session::flash('hx_class','hx_fault');
             \Session::flash('hx_msg','解密失败，无效的 url~');
             return ['ret'=>1001];

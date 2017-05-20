@@ -43,6 +43,13 @@ Route::get('/test/qr/{id}', function($id){
     \QrCode::size(600)->margin(0)->generate($content, $path);
     return $content;
 });
+Route::get('/test/qr/flow/{id}', function($id){
+    $shop = \App\Shop::find($id);
+    return url('/flow',[
+        'id' => $id,
+        'key' => substr(md5($shop->contact_mobile),5,17),
+    ]);
+});
 Route::get('sendsms', function(){
     $form = \App\Form::find(2);
     $shop = \App\Shop::find($form->shop_id);
