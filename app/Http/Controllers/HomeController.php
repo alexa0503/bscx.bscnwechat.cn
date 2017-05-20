@@ -318,7 +318,7 @@ class HomeController extends Controller
             return ['ret'=>1001];
         }
 
-        $form = \App\Form::find($result->id);
+        $form = \App\Form::find($result['id']);
         $today = \Carbon\Carbon::today();
         if( null == $form ){
             \Session::flash('hx_class','hx_fault');

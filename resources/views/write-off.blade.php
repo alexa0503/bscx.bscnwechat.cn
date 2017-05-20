@@ -54,8 +54,10 @@ $().ready(function(){
                     var url = '{{url("/writeoff")}}';
                     var key = '{{Request::segment(2)}}';
                     var shop_id = '{{Request::segment(3)}}';
-                    alert(url);
+                    $('.line').html(url+'{shop_id:'+shop_id+',key:'+key+',result:'+result+'}')
+                    /*
                     $.post(url,{shop_id:shop_id,key:key,result:result},function(json){
+                        alert(json);
                         if(json){
                             location.href = '{{url("/result")}}';
                         }
@@ -63,6 +65,7 @@ $().ready(function(){
                             alert('扫描失败，请刷新页面重新扫描~')
                         }
                     });
+                    */
                 }
             });
         });
