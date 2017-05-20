@@ -93,10 +93,34 @@ class HomeController extends Controller
 
             $file = 'qr/'.$form->id.'.svg';
             $path = public_path($file);
-            $content = url('/coupon',['id'=>$form->id,'key'=>subStr(md5($form->mobile),5,17)]);
+            $content = url('/coupon',['id'=>$form->id,'key'=>substr(md5($form->mobile),5,17)]);
             \QrCode::size(600)->margin(0)->generate($content, $path);
             $data['qr_code'] = url($file);
             //发送短信
+            //用户短信
+            $msg_mobile = $form->mobile;
+            $form_url = url('/flow',[
+                'id' => $form->id,
+                'key' => substr(md5($form->mobile),5,17),
+            ]);
+            $msg_content = '感谢您参与普利司通春季促销活动，您已成功预约免费更换机油服务。预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$data['address'].'），请您务必在预约日期当天前往预约门店更换机油，逾期作废。url:'.$form_url;
+            $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
+            file_get_contents($url);
+            //店铺短信
+            if( env('APP_ENV') == 'dev' ){
+                $msg_mobile = '15618892632';
+                //$msg_mobile = '13816214832';
+            }
+            else{
+                $msg_mobile = $shop->contact_mobile;
+            }
+            $shop_url = url('/flow',[
+                'id' => $shop->id,
+                'key' => substr(md5($shop->contact_mobile),5,17),
+            ]);
+            $msg_content = '您好，'.$form->booking_date.'将有1位手机尾号为：'.substr($form->mobile,-4).'的用户光顾车之翼（'.$shop->name.'）店铺体验更换机油服务（'.$form->oil_info.'），请在用户到店后按此步骤操作：第一步：打开此链（'.$shop_url.'）；第二步：截图保存页面上的二维码；第三步：打开微信，在微信右上角的扫一扫中，打开相册扫描二维码；第四步，进入核销页面后扫描顾客提供的二维码进行核销；谢谢。';
+            $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
+            file_get_contents($url);
             \DB::commit();
             return ['ret'=>0, 'msg'=>'','data'=>$data];
         } catch (Exception $e) {
@@ -273,7 +297,7 @@ class HomeController extends Controller
         if( null == $shop){
             return 'invalid  url';
         }
-        $keyy = subStr(md5($shop->contact_mobile),5,17);
+        $keyy = substr(md5($shop->contact_mobile),5,17);
         if( $keyy != $key){
             return 'invalid  url';
         }
@@ -337,7 +361,7 @@ class HomeController extends Controller
     public function getCoupon(Request $request,$id,$key)
     {
         $form = \App\Form::find($id);
-        $keyy = subStr(md5($form->mobile),5,17);
+        $keyy = substr(md5($form->mobile),5,17);
         if( null == $form && $keyy == $key){
             return 'invalid url';
             //return view ('write-off');
@@ -356,7 +380,7 @@ class HomeController extends Controller
         if( null == $shop){
             return 'invalid  url';
         }
-        $keyy = subStr(md5($shop->contact_mobile),5,17);
+        $keyy = substr(md5($shop->contact_mobile),5,17);
         if( $keyy != $key){
             return 'invalid  url';
         }

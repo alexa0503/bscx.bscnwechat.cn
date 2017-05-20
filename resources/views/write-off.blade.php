@@ -41,34 +41,10 @@
 </div>
 <script src="{{asset('js/jquery-2.1.1.min.js')}}"></script>
 <script src="//res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
-<script src="//newwx.ompchina.net/public/javascripts/weixinjssdk.js"></script>
-<script>
-DATAForWeixin.debug = true; // 可设置为 true 以调试
-
-DATAForWeixin.appId = 'wx1f984cba30eb34b7',//账号的appid
-DATAForWeixin.openid = '',
-DATAForWeixin.sharecampaign = '普利司通',//campaign名称
-/* 请修改以下文字和图片，定制分享文案 */
-DATAForWeixin.setTimeLine({
-    title: ' ',
-    imgUrl: '',
-    link: ''
-});
-DATAForWeixin.setAppMessage({
-    title: '',
-    imgUrl: '',
-    desc: ' ',
-    link: ''
-});
-DATAForWeixin.setQQ({
-    title: ' ',
-    imgUrl: '',
-    desc: ' ',
-    link: ''
-});
-$(document).ready(function () {
-    DATAForWeixin.getWx(function (wx) {
-        // 9.1.2 扫描二维码并返回结果
+<script type="text/javascript" charset="utf-8">
+    wx.config({!! \EasyWeChat::js()->config(array('scanQRCode'), true); !!});
+wx.ready(function(){
+    wx.ready(function(){
         $('#scan').on('click', function () {
             wx.scanQRCode({
                 needResult: 0, // 默认为0，扫描结果由微信处理，1则直接返回扫描结果，
