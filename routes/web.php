@@ -27,7 +27,7 @@ Route::get('/booking/date',function(){
     $today = \Carbon\Carbon::today();
     //$date[] = $today->toDateString();
     $date = [];
-    for ($i=0; $i < 15; $i++) {
+    for ($i=0; $i < 14; $i++) {
         $date[] = $today->addDays(1)->toDateString();
     }
     return $date;
@@ -70,7 +70,7 @@ Route::get('sendsms', function(){
         'id' => $form->id,
         'key' => substr(md5($form->mobile),5,17),
     ]);
-    $msg_content = '感谢您参与普利司通春季促销活动，您已成功预约免费更换机油服务。预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$data['address'].'），请您务必在预约日期当天前往预约门店更换机油，逾期作废。url:'.$form_url;
+    '感谢您参与普利司通春季促销活动，您已成功预约免费更换机油服务。预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$data['address'].'），您的预约码请点击以下地址查看：'.$form_url.'，请您务必在预约日期当天前往预约门店更换机油，逾期作废。';
     $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
     $result = file_get_contents($url);
     return $result;
