@@ -56,7 +56,7 @@
 	<div class="blue" style=" ">还请告知消费者。谢谢！</div>
     @endif
     @else
-    <div>无效的链接</div>
+    <div>链接失效,请重新扫描~</div>
     @endif
 </div>
 

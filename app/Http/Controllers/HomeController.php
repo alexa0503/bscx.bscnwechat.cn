@@ -109,8 +109,8 @@ class HomeController extends Controller
             file_get_contents($url);
             //店铺短信
             if( env('APP_ENV') == 'dev' ){
-                $msg_mobile = '15618892632';
-                //$msg_mobile = '13816214832';
+                //$msg_mobile = '15618892632';
+                $msg_mobile = '13816214832';
             }
             else{
                 $msg_mobile = $shop->contact_mobile;
