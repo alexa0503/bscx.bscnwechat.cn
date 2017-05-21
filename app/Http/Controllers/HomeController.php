@@ -89,6 +89,7 @@ class HomeController extends Controller
             $form->shop_id = $request->input('shop');
             $form->oil_info = $request->input('oil_info');
             $form->booking_date = $request->input('booking_date');
+            $form->sex = $request->input('sex');
             $form->save();
             $lottery->is_booked = 1;
             $lottery->save();
