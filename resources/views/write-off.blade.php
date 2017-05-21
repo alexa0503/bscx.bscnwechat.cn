@@ -48,10 +48,7 @@
 <script type="text/javascript" charset="utf-8">
     wx.config({!! \EasyWeChat::js()->config(array('scanQRCode'), false); !!});
 $().ready(function(){
-    $('.enter_1').on('click', function () {
-        var result = 'eyJpdiI6IkhVbjVBMHhjTHBBXC96WlVOeTZWQ0JRPT0iLCJ2YWx1ZSI6IlwvV3FFR1YzMmNQR0puM0sremFcL244NEpMSjN0dUY0MWZpNXVpVmIxTGdMMVZYMlhUa282cjVjMDMydXh0YWdFN2FXV2hUQ1lxamVDejc2OVlOUzlwNnc9PSIsIm1hYyI6IjVhNzhlMDdlM2JiYzEyYWY1ZjVjZjFhYjg4ODkyNDFkMTVjNDc3MmFmYmU3M2E1YjlhNDc4NDI1M2JiOWFlYmMifQ';
-        $.when($('#input-result').val(result)).then($('#form-writeoff').submit());
-    });
+    
     wx.ready(function(){
         $('.enter_1').on('click', function () {
             wx.scanQRCode({
