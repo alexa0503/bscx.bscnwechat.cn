@@ -230,22 +230,20 @@ class HomeController extends Controller
                 $rand1 = rand(1, $seed);
                 $rand2 = rand(1, $seed);
                 $lottery->is_winned = $rand1 == $rand2 ? 1 : 0;
-                $lottery->created_ip = $request->ip();
-                if( $rand1 == $rand2 ){
-                    $request->session()->put('has_winned', 1);
-                    $request->session()->put('lottery.id', $lottery->id);
-                    //奖项中奖数量自增1
-                    $total_setting->winned_num += 1;
-                    $total_setting->save();
-                    //奖项中奖数量自增1
-                    $today_setting->winned_num += 1;
-                    $today_setting->save();
-                    $return = ['ret'=>0,'msg'=>'恭喜'];
-                }
-                else{
-                    $return = ['ret'=>1004,'msg'=>'未中奖'];
-                }
+                $return = ['ret'=>1004,'msg'=>'未中奖'];
             }
+            if( $lottery->is_winned == 1 ){
+                $request->session()->put('has_winned', 1);
+                $request->session()->put('lottery.id', $lottery->id);
+                //奖项中奖数量自增1
+                $total_setting->winned_num += 1;
+                $total_setting->save();
+                //奖项中奖数量自增1
+                $today_setting->winned_num += 1;
+                $today_setting->save();
+                $return = ['ret'=>0,'msg'=>'恭喜'];
+            }
+            $lottery->created_ip = $request->ip();
             $lottery->save();
             \DB::commit();
         } catch (Exception $e) {
