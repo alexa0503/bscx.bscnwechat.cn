@@ -71,10 +71,16 @@ class HomeController extends Controller
         }
         $count = \App\Form::where('mobile',$request->input('mobile'))->count();
         if( $count > 0){
-            return ['ret'=>1002,'msg'=>['mobile'=>'手机号已存在']];
+            return ['ret'=>1002,'msg'=>['mobile'=>'该手机号码已获得过免费换机油服务，请更换手机号码重新参与活动。']];
         }
+
         \DB::beginTransaction();
         try {
+            $shop = \App\Shop::find($request->input('shop'));
+            $province = $shop->province;
+            if( null == $shop || $province->booked_limit_num <= $province->booked_num ){
+                return ['ret'=>1005, 'msg'=>['shop'=>'该门店已经无法预约了']];
+            }
             $form = new \App\Form;
             $form->lottery_id = $lottery_id;
             $form->name = $request->input('name');
@@ -86,7 +92,7 @@ class HomeController extends Controller
             $form->save();
             $lottery->is_booked = 1;
             $lottery->save();
-            $shop = \App\Shop::find($form->shop_id);
+
 
             $data = $form->toArray();
             $data['shop_name'] = $shop->name;
@@ -100,7 +106,7 @@ class HomeController extends Controller
             //发送短信
             //用户短信
             $msg_mobile = $form->mobile;
-            $form_url = url('/flow',[
+            $form_url = url('/coupon',[
                 'id' => $form->id,
                 'key' => substr(md5($form->mobile),5,17),
             ]);
@@ -116,12 +122,13 @@ class HomeController extends Controller
                 $msg_mobile = $shop->contact_mobile;
             }
             $shop_url = url('/flow',[
-                'id' => $shop->id,
+                'id' => $form->shop_id,
                 'key' => substr(md5($shop->contact_mobile),5,17),
             ]);
             $msg_content = '您好，'.$form->booking_date.'将有1位手机尾号为：'.substr($form->mobile,-4).'的用户光顾车之翼（'.$shop->name.'）店铺体验更换机油服务（'.$form->oil_info.'），请在用户到店后按此步骤操作：第一步：打开此链（'.$shop_url.'）；第二步：截图保存页面上的二维码；第三步：打开微信，在微信右上角的扫一扫中，打开相册扫描二维码；第四步，进入核销页面后扫描顾客提供的二维码进行核销；谢谢。';
             $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
             file_get_contents($url);
+            $province->booked_num += 1;
             \DB::commit();
             return ['ret'=>0, 'msg'=>'','data'=>$data];
         } catch (Exception $e) {
@@ -323,42 +330,57 @@ class HomeController extends Controller
         $form = \App\Form::find($result['id']);
         $today = \Carbon\Carbon::today();
         if( null == $form ){
-            \Session::flash('hx_class','hx_fault');
-            \Session::flash('hx_msg','1100');//店铺不匹配
-            return ['ret'=>1100];
+            //店铺不匹配
+            $hx_class = 'hx_fault';
+            $ret = 1100;
         }elseif( $form->shop_id != $shop_id ){
-            \Session::flash('hx_class','hx_fault');
-            \Session::flash('hx_msg','1002');//店铺不匹配
-            $address = $form->shop->province->name.' '.$form->shop->city->name.' '.$form->shop->area->name.' '.$form->shop->address;
-            \Session::flash('hx_address', $address);
-            return ['ret'=>1002];
+            //店铺不匹配
+            $hx_class = 'hx_fault';
+            $ret = 1002;
         }elseif( $form->lottery->is_received == 1){
-            \Session::flash('hx_class','hx_fault');
-            \Session::flash('hx_msg','1003');//此二维码已核销
-            return ['ret'=>1003];
+            //此二维码已核销
+            $hx_class = 'hx_fault';
+            $ret = 1003;
         }
         elseif( $form->booking_date != $today){
-            \Session::flash('hx_class','hx_fault');
-            \Session::flash('hx_msg','1004');//预约时间不符
-            \Session::flash('hx_booking_date',$form->booking_date);
-            return ['ret'=>1004];
+            //预约时间不符
+            $hx_class = 'hx_fault';
+            $ret = 1004;
         }
         elseif( $form->is_invalid == 1){
-            \Session::flash('hx_class','hx_fault');
-            \Session::flash('hx_msg','1005');//该领奖券已经失效
+            //该领奖券已经失效
             return ['ret'=>1005];
+            $hx_class = 'hx_fault';
+            $ret = 1005;
         }
         else{
             $form->is_received = 1;
             $form->save();
-            \Session::flash('hx_class','hx_success');
-            \Session::flash('hx_msg','0');
-            return ['ret'=>0];
+            $hx_class = 'hx_success';
+            $ret = 0;
         }
-        //return view ('write-off-result');
+        if( $ret == 0){
+            $form = \App\Form::find(\Session::get('hx_id'));
+            return view('write-off-success',[
+                'form' => $form
+            ]);
+        }
+        else{
+            return view ('write-off-result',[
+                'hx_class' => $hx_class,
+                'ret' => $ret,
+                'form' => $form,
+            ]);
+        }
     }
     public function getWriteOffResult(Request $request)
     {
+        if( null != \Session::get('hx_id') && \Session::get('hx_ret') == 0 ){
+            $form = \App\Form::find(\Session::get('hx_id'));
+            return view('write-off-success',[
+                'form' => $form
+            ]);
+        }
         return view('write-off-result');
     }
     public function getCoupon(Request $request,$id,$key)

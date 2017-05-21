@@ -32,33 +32,30 @@
 
 </head>
 <body>
-<div class="abs {{Session::has('hx_class') ? Session('hx_class') : 'hx_fault'}}" ></div>
+<div class="abs {{$hx_class}}" ></div>
 <div class="abs txt black"  style="top: 347px;">
-    @if(Session::has('hx_msg'))
-    @if(Session('hx_msg') == '1003')
+    @if($ret == '1003')
 	<div>此二维码已核销</div>
 	<div class="line"></div>
 	<div class="txt-left black adjust-bottom">如有问题请致电：</div>
 	<div class="txt-left blue">18621534023或</div>
 	<div class="txt-left blue">021-61321888*4321</div>
 	</div>
-    @elseif(Session('hx_msg') == '1004')
+    @elseif($ret == '1004')
     <div class="black">预约时间不符</div>
 	<div class="line"></div>
 	<div class="txt-left" style="top: 493px; ">正确的预约时间：
-	<div class="gray adjust-bottom">{{ Session('hx_booking_date') }}</div>
+	<div class="gray adjust-bottom">{{ $form->booking_date }}</div>
 	<div class="txt-left blue">
 	请通知消费者准确的预约时间到店。谢谢！
 	</div>
-    @elseif(Session('hx_msg') == '1002')
-	<div>预约店铺不符，<br/>正确门店信息：{{ Session('hx_address') }}.  </div>
+    @elseif($ret == '1002')
+	<div>预约店铺不符，<br/>正确门店信息：{{$form->shop->province->name}} {{$form->shop->city->name}} {{$form->shop->area->name}} {{$form->shop->address}}  </div>
 	<div class="line"></div>
 	<div class="blue" style=" ">还请告知消费者。谢谢！</div>
-    @endif
     @else
     <div>链接失效,请重新扫描~</div>
     @endif
 </div>
-
 </body>
 </html>

@@ -38,6 +38,34 @@
 	position:absolute;
 	font-size:2.4em;
 }
+.flw{
+	
+}
+.info{
+	margin-left:0px;
+	float:left;
+	height: auto; 
+	line-height:1.75em;
+}
+.info-name{ 
+	width: 130px; 
+	font-weight:bold;  
+	height: auto; 
+	float:left;
+	line-height:1.75em;
+}
+.info-line{
+}
+.clear{
+	clear:both; height: 0; line-height: 0; font-size: 0
+}
+.information{
+	font-size:1.75em;
+}
+.t8{
+	text-align:center; 
+	margin-top:12px;
+}
 .page1{
 	background-color:white;
 	width:100%;

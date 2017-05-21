@@ -38,6 +38,12 @@
         <div class="line">{{$shop->name}}</div>
         <button id="scan">核销</button>
     </div>
+    <form action="{{url("/writeoff")}}" type="post" id="form-writeoff">
+        {{ csrf_field() }}
+        <input type="hidden" value="{{Request::segment(3)}}" name="key" />
+        <input type="hidden" value="{{Request::segment(2)}}" name="shop_id" />
+        <input type="hidden" value="" name="result" id="input-result" />
+    </form>
 </div>
 <script src="{{asset('js/jquery-2.1.1.min.js')}}"></script>
 <script src="//res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
@@ -51,6 +57,9 @@ $().ready(function(){
                 scanType: ["qrCode","barCode"], // 可以指定扫二维码还是一维码，默认二者都有
                 success: function (res) {
                     var result = res.resultStr; // 当needResult 为 1 时，扫码返回的结果
+                    $('#input-result').val(result);
+                    $('#form-writeoff').submit();
+                    /*
                     var url = '{{url("/writeoff")}}';
                     var key = '{{Request::segment(3)}}';
                     var shop_id = '{{Request::segment(2)}}';
@@ -63,7 +72,7 @@ $().ready(function(){
                             alert('扫描失败，请刷新页面重新扫描~')
                         }
                     });
-
+                    */
                 }
             });
         });
