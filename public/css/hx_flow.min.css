@@ -3,12 +3,13 @@ body{background:#eee;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-
 .swiper-container{width:100%;height:100%;}
 .swiper-slide{text-align:center;font-size:18px;background:#fff;display:-webkit-box;display:-ms-flexbox;display:-webkit-flex;display:flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-ms-flex-align:center;-webkit-align-items:center;align-items:center;}
 .abs{position:absolute;font-size:2.4em;}
+.center{text-align:center;color:#3f3c43;line-height:1.15em;}
 .flw{}
-.info{margin-left:0px;float:left;height:auto;line-height:1.75em;}
-.info-name{width:130px;font-weight:bold;height:auto;float:left;line-height:1.75em;}
+.info{margin-left:0px;float:left;height:auto;line-height:1.5em;}
+.info-name{width:130px;font-weight:bold;height:auto;float:left;line-height:1.5em;}
 .info-line{}
 .clear{clear:both;height:0;line-height:0;font-size:0}
-.information{font-size:1.75em;}
+.information{font-size:1.75em;color:#3f3c43;}
 .t8{text-align:center;margin-top:12px;}
 .page1{background-color:white;width:100%;height:100%;z-index:90;}
 .txt{top:350px;text-align:center;margin:0px 20%;width:60%;}

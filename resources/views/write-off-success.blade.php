@@ -34,7 +34,7 @@
 </head>
 <body>
 	<div class="abs blk" style="width: 522px; height: 700px; left: 60px; top: 156px;  background-image: url('{{asset("images/blk.png")}}');"></div>
-	<div class="abs information" style="left: 123px; top: 327px;  ">
+	<div class="abs information" style="left: 123px; top: 327px;">
 		<div class="flw info-line t1" style="">
 			<div class="info-name ">预约人: </div>
 			<div class="info info1" style="width: 307px; left: 242px; top: 322px;  ">{{$form->name}}</div>

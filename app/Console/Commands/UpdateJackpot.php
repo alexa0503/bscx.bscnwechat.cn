@@ -46,7 +46,7 @@ class UpdateJackpot extends Command
                 ->where('created_at', '>=', $now->toDateString())
                 ->where('created_at', '<', $now->copy()->addDays(1)->toDateString())
                 ->where('created_at', '<', $now->copy()->subMinutes(30)->toDateTimeString())
-                ->where('is_written', 0)
+                ->where('is_booked', 0)
                 ->where('is_invalid', 0)
                 ->count();
             //当天配置
@@ -60,13 +60,13 @@ class UpdateJackpot extends Command
 
             \App\Lottery::where('is_winned',1)
                 ->where('created_at', '<', $now->copy()->subMinutes(30)->toDateTimeString())
-                ->where('is_written', 0)
+                ->where('is_booked', 0)
                 ->where('is_invalid', 0)
                 ->update(['is_invalid' => 1]);
 
             #超过预约期的返还奖池
             $amount_failure = \App\Lottery::where('is_winned',1)
-                ->where('is_written', 1)
+                ->where('is_booked', 1)
                 ->where('is_received',0)
                 ->where('created_at', '<', $now->copy()->addDays(14)->toDateTimeString())
                 ->where('is_invalid', 0)
@@ -75,7 +75,7 @@ class UpdateJackpot extends Command
             $total_setting->save();
 
             \App\Lottery::where('is_winned',1)
-                ->where('is_written', 1)
+                ->where('is_booked', 1)
                 ->where('is_received',0)
                 ->where('created_at', '<', $now->copy()->addDays(14)->toDateTimeString())
                 ->where('is_invalid', 0)

@@ -36,19 +36,19 @@ class HomeController extends Controller
     //信息提交
     public function formPost(Request $request){
         if( null == $request->session()->get('lottery.id')){
-            return ['ret'=>1002,'msg'=>'您并未中奖'];
+            return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
         $lottery_id = $request->session()->get('lottery.id');
         $lottery = \App\Lottery::find($lottery_id);
 
         if( null == $lottery || $lottery->is_winned != 1 ){
-            return ['ret'=>1003,'msg'=>'您并没有中奖，无法填写信息~'];
+            return ['ret'=>1003,'msg'=>['error'=>'您并没有中奖，无法填写信息~']];
         }
         elseif( $lottery->is_booked == 1 ){
-            return ['ret'=>1004, 'msg'=>'抽奖信息已失效~'];
+            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
         }
         elseif( $lottery->is_invalid == 1 ){
-            return ['ret'=>1004, 'msg'=>'抽奖信息已失效~'];
+            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
         }
         $messages = [
             'name.required' => '请正确输入姓名',
@@ -129,11 +129,14 @@ class HomeController extends Controller
             $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
             file_get_contents($url);
             $province->booked_num += 1;
+            $province->save();
+            $request->session()->put('has_winned', null);
+            $request->session()->put('lottery.id', null);
             \DB::commit();
             return ['ret'=>0, 'msg'=>'','data'=>$data];
         } catch (Exception $e) {
             \DB::rollBack();
-            return ['ret'=>1100, 'msg'=>$e->getMessage()];
+            return ['ret'=>1100, 'msg'=>['error'=>$e->getMessage()]];
         }
 
 
@@ -245,59 +248,6 @@ class HomeController extends Controller
             $return = ['ret'=>1005, 'msg'=>$e->getMessage()];
         }
         return $return;
-        /*
-        $now = \Carbon\Carbon::now();
-        $setting1 = \App\LotterySetting::whereNull('lottery_date')->first();
-        $setting2 = \App\LotterySetting::where('lottery_date', $now->toDateString())->first();
-        $total_amount = $setting1 == null ? 0 : $setting1->max_num;
-        #当天总量,抽奖几率
-        if( null == $setting2){
-            $today_total_amount = 0;
-            $winning_odds = 0;
-        }
-        else{
-            $today_total_amount = $setting1->max_num;
-            $winning_odds = $setting2->winning_odds;
-        }
-
-
-        #当天已中奖总数
-        $count_winned = \App\Lottery::where('is_winned',1)
-            ->where('created_at', '>=', $now->toDateString())
-            ->where('created_at', '<', $now->addDays(1)->toDateString())
-            ->count();
-        #当天已中奖超过30分钟未填写信息数量 跨天填写信息的 bug
-        $count_exceed = \App\Lottery::where('is_winned',1)
-            ->where('created_at', '>=', $now->toDateString())
-            ->where('created_at', '<', $now->subMinutes(30)->toDateTimeString())
-            ->where('created_at', '<', $now->addDays(1)->toDateString())
-            ->where('is_booked', 0)
-            ->count();
-        #当天已中奖且已填写信息数量
-        $count_written = \App\Lottery::where('is_winned',1)
-            ->where('created_at', '>=', $now->toDateString())
-            ->where('created_at', '<', $now->addDays(1)->toDateString())
-            ->where('is_booked', 1)
-            ->count();
-
-        #已领取奖品数量
-        $amount_received = \App\Lottery::where('is_received',1)->count();
-        #已填写信息未领取
-        $amount_written = \App\Lottery::where('is_winned',1)
-            ->where('is_booked', 1)
-            ->where('is_received',0)
-            ->count();
-        #已中奖14天内未领取奖品数量
-        $amount_failure = \App\Lottery::where('is_winned',1)
-            ->where('is_booked', 1)
-            ->where('is_received',0)
-            ->where('created_at', '<',$now->addDays(14)->toDateTimeString())
-            ->count();
-        #当天奖池有效奖数量
-        $current_effective = $today_total_amount - $count_winned + $count_exceed;
-        #总的有效奖数量
-        $total_effective = $total_amount - $amount_received - $amount_written + $amount_failure;
-        */
     }
     public function getWriteOff(Request $request,$id,$key)
     {
@@ -322,9 +272,10 @@ class HomeController extends Controller
             $key = $request->input('key');
             $result = decrypt($request->input('result'));
         } catch (DecryptException $e) {
-            \Session::flash('hx_class','hx_fault');
-            \Session::flash('hx_msg','解密失败，无效的 url~');
-            return ['ret'=>1001];
+            return view ('write-off-result',[
+                'hx_class' => 'hx_fault',
+                'ret' => 1001,
+            ]);
         }
 
         $form = \App\Form::find($result['id']);
@@ -342,7 +293,7 @@ class HomeController extends Controller
             $hx_class = 'hx_fault';
             $ret = 1003;
         }
-        elseif( $form->booking_date != $today){
+        elseif( $form->booking_date != $today->toDateString()){
             //预约时间不符
             $hx_class = 'hx_fault';
             $ret = 1004;
@@ -354,15 +305,24 @@ class HomeController extends Controller
             $ret = 1005;
         }
         else{
-            $form->is_received = 1;
+            $form->check_date = \Carbon\Carbon::now();
             $form->save();
+            $lottery = $form->lottery;
+            $lottery->is_received = 1;
+            $lottery->save();
             $hx_class = 'hx_success';
             $ret = 0;
         }
         if( $ret == 0){
-            $form = \App\Form::find(\Session::get('hx_id'));
             return view('write-off-success',[
                 'form' => $form
+            ]);
+        }
+        elseif( $ret == 1003){
+            return view ('write-off-failed',[
+                'hx_class' => $hx_class,
+                'ret' => $ret,
+                'form' => $form,
             ]);
         }
         else{
