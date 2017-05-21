@@ -68,7 +68,7 @@ class UpdateJackpot extends Command
             $amount_failure = \App\Lottery::where('is_winned',1)
                 ->where('is_booked', 1)
                 ->where('is_received',0)
-                ->where('created_at', '<', $now->copy()->addDays(14)->toDateTimeString())
+                ->where('created_at', '<', $now->copy()->subDays(14)->toDateTimeString())
                 ->where('is_invalid', 0)
                 ->count();
             $total_setting->winned_num -= ($count + $amount_failure);
@@ -77,7 +77,7 @@ class UpdateJackpot extends Command
             \App\Lottery::where('is_winned',1)
                 ->where('is_booked', 1)
                 ->where('is_received',0)
-                ->where('created_at', '<', $now->copy()->addDays(14)->toDateTimeString())
+                ->where('created_at', '<', $now->copy()->subDays(14)->toDateTimeString())
                 ->where('is_invalid', 0)
                 ->update(['is_invalid' => 1]);
 
