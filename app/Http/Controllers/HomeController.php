@@ -289,6 +289,12 @@ class HomeController extends Controller
             //店铺不匹配
             $hx_class = 'hx_fault';
             $ret = 1002;
+        }
+        elseif( $form->is_invalid == 1){
+            //该领奖券已经失效
+            return ['ret'=>1005];
+            $hx_class = 'hx_fault';
+            $ret = 1005;
         }elseif( $form->lottery->is_received == 1){
             //此二维码已核销
             $hx_class = 'hx_fault';
@@ -298,12 +304,6 @@ class HomeController extends Controller
             //预约时间不符
             $hx_class = 'hx_fault';
             $ret = 1004;
-        }
-        elseif( $form->is_invalid == 1){
-            //该领奖券已经失效
-            return ['ret'=>1005];
-            $hx_class = 'hx_fault';
-            $ret = 1005;
         }
         else{
             $form->check_date = \Carbon\Carbon::now();
