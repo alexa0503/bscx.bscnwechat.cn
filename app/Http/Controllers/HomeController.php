@@ -81,6 +81,10 @@ class HomeController extends Controller
             if( null == $shop || $province->booked_limit_num <= $province->booked_num ){
                 return ['ret'=>1005, 'msg'=>['shop'=>'该门店已经无法预约了']];
             }
+            $count = \App\Form::where('booking_date',$request->input('booking_date'))->count();
+            if( $count >= 4 ){
+                return ['ret'=>1005, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
+            }
             $form = new \App\Form;
             $form->lottery_id = $lottery_id;
             $form->name = $request->input('name');
@@ -162,7 +166,7 @@ class HomeController extends Controller
             return $item->area_id;
         })->toArray();
 
-        $provinces = \App\Province::whereIn('id',$province_ids)->get();
+        $provinces = \App\Province::whereIn('id',$province_ids)->where('booked_limit_num','>','booked_num')->get();
         $data = $provinces->map(function($item) use($city_ids,$area_ids){
             $cities = $item->cities->whereIn('id',$city_ids)->map(function($item) use($area_ids){
                 $areas = $item->areas->whereIn('id',$area_ids)->map(function($item){
@@ -209,6 +213,9 @@ class HomeController extends Controller
         try{
             $total_setting = \App\LotterySetting::whereNull('lottery_date')->first();
             $today_setting = \App\LotterySetting::where('lottery_date', $now->toDateString())->first();
+
+            $lottery = new \App\Lottery;
+            $lottery->is_winned = 0;
             if( null == $total_setting || null == $today_setting ){
                 $return = ['ret'=>1001,'msg'=>'未中奖'];
             }
@@ -222,12 +229,8 @@ class HomeController extends Controller
                 $seed = ceil(10000/$today_setting->winning_odds);
                 $rand1 = rand(1, $seed);
                 $rand2 = rand(1, $seed);
-
-                $lottery = new \App\Lottery;
                 $lottery->is_winned = $rand1 == $rand2 ? 1 : 0;
                 $lottery->created_ip = $request->ip();
-                $lottery->save();
-
                 if( $rand1 == $rand2 ){
                     $request->session()->put('has_winned', 1);
                     $request->session()->put('lottery.id', $lottery->id);
@@ -243,6 +246,7 @@ class HomeController extends Controller
                     $return = ['ret'=>1004,'msg'=>'未中奖'];
                 }
             }
+            $lottery->save();
             \DB::commit();
         } catch (Exception $e) {
             \DB::rollBack();
