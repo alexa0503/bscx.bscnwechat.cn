@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class SendMessage extends Command
 {
@@ -45,8 +46,9 @@ class SendMessage extends Command
                 $msg_content = '普利司通温馨提醒，您已预约明天到店（地址）更换机油服务，请您准时前往哦！感谢您参加普利司通春季促销活动。';
                 $msg_mobile = $form->mobile;
                 $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
-                $this->info($msg_content.$form->name.$form->booking_date);
                 file_get_contents($url);
+                \Log::useDailyFiles(storage_path('logs/users-send.log'));
+                \Log::info('Send messages: '.$msg_content);
             }
         }
         else{
@@ -66,6 +68,8 @@ class SendMessage extends Command
                 $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
                 //$this->info($msg_content.$today->copy()->toDateString());
                 file_get_contents($url);
+                \Log::useDailyFiles(storage_path('logs/clerks-send.log'));
+                \Log::info('Send messages: '.$msg_content);
             }
         }
     }
