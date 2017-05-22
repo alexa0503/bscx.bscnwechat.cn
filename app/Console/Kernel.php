@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\UpdateJackpot::class,
         Commands\UpdateShop::class,
+        Commands\SendMessage::class,
     ];
 
     /**
@@ -26,7 +27,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('update:jackpot')
-                ->everyFiveMinutes();
+                ->everyMinute();
+        $schedule->command('send:message users')
+                ->dailyAt('17:00');
+        $schedule->command('send:message')
+                ->dailyAt('10:00');
     }
 
     /**
