@@ -120,8 +120,8 @@ class HomeController extends Controller
             file_get_contents($url);
             //店铺短信
             if( env('APP_ENV') == 'dev' ){
-                //$msg_mobile = '15618892632';
-                $msg_mobile = '13816214832';
+                $msg_mobile = '15618892632';
+                //$msg_mobile = '13816214832';
             }
             else{
                 $msg_mobile = $shop->contact_mobile;
@@ -232,19 +232,19 @@ class HomeController extends Controller
                 $lottery->is_winned = $rand1 == $rand2 ? 1 : 0;
                 $return = ['ret'=>1004,'msg'=>'未中奖'];
             }
+            $lottery->created_ip = $request->ip();
+            $lottery->save();
             if( $lottery->is_winned == 1 ){
-                $request->session()->put('has_winned', 1);
-                $request->session()->put('lottery.id', $lottery->id);
                 //奖项中奖数量自增1
                 $total_setting->winned_num += 1;
                 $total_setting->save();
                 //奖项中奖数量自增1
                 $today_setting->winned_num += 1;
                 $today_setting->save();
-                $return = ['ret'=>0,'msg'=>'恭喜'];
+                $request->session()->put('has_winned', 1);
+                $request->session()->put('lottery.id', $lottery->id);
+                $return = ['ret'=>0,'msg'=>'恭喜'.$lottery->id];
             }
-            $lottery->created_ip = $request->ip();
-            $lottery->save();
             \DB::commit();
         } catch (Exception $e) {
             \DB::rollBack();
