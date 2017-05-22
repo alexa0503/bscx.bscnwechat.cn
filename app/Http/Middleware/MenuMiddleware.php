@@ -22,8 +22,8 @@ class MenuMiddleware
             //$menu1->add('查看', ['url'=>route('gallery.index'),'class'=>'bg-palette2']);
             //$menu1->add('新增', ['url'=>route('gallery.create'),'class'=>'bg-palette2']);
             $menu_form = $menu->add('预约管理', ['url'=>'#','class'=>'openable bg-palette2']);
-            $menu_form->add('未预约',['url'=>route('form.index'), 'class'=>'bg-palette2']);
-            $menu_form->add('已预约',['url'=>route('form.index','subscribed'), 'class'=>'bg-palette2']);
+            //$menu_form->add('未预约',['url'=>route('form.index'), 'class'=>'bg-palette2']);
+            $menu_form->add('所有预约',['url'=>route('form.index'), 'class'=>'bg-palette2']);
             $menu_form->add('已领取',['url'=>route('form.index','received'), 'class'=>'bg-palette2']);
             $menu_form->add('已失效',['url'=>route('form.index','invalid'), 'class'=>'bg-palette2']);
 

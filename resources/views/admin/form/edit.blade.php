@@ -41,7 +41,7 @@
                         <label for="send_msg" class="col-lg-2 control-label">短信发送</label>
                         <div class="col-lg-10">
                             <div class="custom-checkbox">
-								<input type="checkbox" name="send_msg" id="chk1">
+								<input type="checkbox" value="1" name="send_msg" id="chk1">
 								<label for="chk1"></label>
 							</div>
                             <label class="help-block" for="" id="help-send"></label>

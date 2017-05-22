@@ -91,6 +91,8 @@ Route::group(['middleware' => ['role:superadmin,global privileges','menu'],'pref
     Route::resource('province', 'Admin\ProvinceController');
     Route::resource('city', 'Admin\CityController');
     Route::resource('area', 'Admin\AreaController');
+
+    Route::get('/shop/export', 'Admin\FormController@export')->name('shop.export');
     Route::resource('shop', 'Admin\ShopController');
 });
 Route::get('/login', 'Auth\LoginController@showLoginForm');
