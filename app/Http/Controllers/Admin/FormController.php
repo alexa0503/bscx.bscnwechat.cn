@@ -36,7 +36,7 @@ class FormController extends Controller
     {
         $filename = "downloads/".date("ymdhis").".csv";
         $handle = fopen($filename, 'w+');
-        $title = ['id','姓名','手机号','性别','车牌号','店铺','是否领奖','是否失效','更改预约次数','预约日期','机油','核销时间','IP','创建时间'];
+        $title = ['id','姓名','手机号','性别','车牌号','店铺','省份','城市','区','地址','是否领奖','是否失效','更改预约次数','预约日期','机油','核销时间','IP','创建时间'];
         fputcsv($handle, $title);
         $items = \App\Form::all();
         foreach($items as $item){
@@ -47,6 +47,10 @@ class FormController extends Controller
             $form[] = $item->sex;
             $form[] = $item->plate_number;
             $form[] = $item->shop->name;
+            $form[] = $item->shop->province->name;
+            $form[] = $item->shop->city->name;
+            $form[] = $item->shop->area->name;
+            $form[] = $item->shop->address;
             $form[] = $item->lottery->is_received == 1 ? '是' : '否';
             $form[] = $item->lottery->is_invalid == 1 ? '是' : '否';
             $form[] = $item->alter_booking_num;
