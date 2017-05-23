@@ -27,8 +27,18 @@ Route::get('/booking/date',function(){
     $today = \Carbon\Carbon::today();
     //$date[] = $today->toDateString();
     $date = [];
+    $weeks = [
+        '周日',
+        '周一',
+        '周二',
+        '周三',
+        '周四',
+        '周五',
+        '周六',
+    ];
     for ($i=0; $i < 14; $i++) {
-        $date[] = $today->addDays(1)->toDateString();
+        $day = $today->addDays(1);
+        $date[$day->toDateString()] = $day->toDateString().'/'.$weeks[$day->dayOfWeek];
     }
     return $date;
 });

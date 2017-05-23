@@ -81,7 +81,7 @@ class HomeController extends Controller
             if( null == $shop || $province->booked_limit_num <= $province->booked_num ){
                 return ['ret'=>1005, 'msg'=>['shop'=>'该门店已经无法预约了']];
             }
-            $count = \App\Form::where('booking_date',$request->input('booking_date'))->count();
+            $count = \App\Form::where('shop_id',$request->input('shop'))->where('booking_date',$request->input('booking_date'))->count();
             if( $count >= 4 ){
                 return ['ret'=>1005, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
             }
