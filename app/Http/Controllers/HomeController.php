@@ -35,7 +35,7 @@ class HomeController extends Controller
     }
     //信息提交
     public function formPost(Request $request){
-        
+
         if( null == $request->session()->get('lottery.id')){
             return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
@@ -173,7 +173,16 @@ class HomeController extends Controller
             return $item->area_id;
         })->toArray();
 
-        $provinces = \App\Province::whereIn('id',$province_ids)->where('booked_limit_num','>','booked_num')->get();
+        if($type == 'subscribed'){
+            $provinces = \App\Province::whereIn('id',$province_ids)
+                ->whereRaw('booked_limit_num >= booked_num')
+                ->get();
+        }
+        else{
+            $provinces = \App\Province::whereIn('id',$province_ids)
+                ->get();
+        }
+
         $data = $provinces->map(function($item) use($city_ids,$area_ids){
             $cities = $item->cities->whereIn('id',$city_ids)->map(function($item) use($area_ids){
                 $areas = $item->areas->whereIn('id',$area_ids)->map(function($item){
