@@ -36,19 +36,19 @@ class HomeController extends Controller
     //信息提交
     public function formPost(Request $request){
         if( null == $request->session()->get('lottery.id')){
-            //return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
+            return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
         $lottery_id = $request->session()->get('lottery.id');
         $lottery = \App\Lottery::find($lottery_id);
 
         if( null == $lottery || $lottery->is_winned != 1 ){
-            //return ['ret'=>1003,'msg'=>['error'=>'您并没有中奖，无法填写信息~']];
+            return ['ret'=>1003,'msg'=>['error'=>'您并没有中奖，无法填写信息~']];
         }
         elseif( $lottery->is_booked == 1 ){
-            //return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
+            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
         }
         elseif( $lottery->is_invalid == 1 ){
-            //return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
+            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
         }
         $messages = [
             'name.required' => '请正确输入姓名',
