@@ -35,6 +35,9 @@ class HomeController extends Controller
     }
     //信息提交
     public function formPost(Request $request){
+        if ($validator->fails()) {
+            return ['ret'=>1001,'msg'=>$validator->errors()->toArray()];
+        }
         if( null == $request->session()->get('lottery.id')){
             return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
@@ -61,8 +64,8 @@ class HomeController extends Controller
         $validator = \Validator::make($request->all(), [
             'name' => 'required',
             'mobile' => 'required|regex:/^1[0-9]{10}$/i',
-            //'plate_number' => ['regex:/^(沪|皖)[a-z][a-z|0-9]{5,6}$/i'],
-            'plate_number' => 'required|max:8',
+            'plate_number' => ['regex:/^(京|津|沪|瑜|冀|豫|云|辽|黑|湘|皖|鲁|苏|赣|浙|粤|鄂|桂|甘|晋|蒙|陕|吉|闽|贵|青|藏|川|宁|新|琼)[a-z][a-z|0-9]{5,6}$/i'],
+            //'plate_number' => 'required|max:8',
             'shop' => 'required',
             'oil_info' => 'required',
             'booking_date' => 'required|date',
