@@ -175,7 +175,7 @@ class HomeController extends Controller
 
         if($type == 'subscribed'){
             $provinces = \App\Province::whereIn('id',$province_ids)
-                ->whereRaw('booked_limit_num >= booked_num')
+                ->whereRaw('booked_limit_num > booked_num')
                 ->get();
         }
         else{
