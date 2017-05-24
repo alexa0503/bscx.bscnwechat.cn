@@ -14,9 +14,34 @@ class ProvinceController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.province.index',[
+            'items' => \App\Province::paginate(20),
+        ]);
     }
-
+    public function export()
+    {
+        $filename = "downloads/".date("ymdhis").".csv";
+        $handle = fopen($filename, 'w+');
+        fputs($handle, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+        $title = ['id','名称','预订限制','已预订'];
+        fputcsv($handle, $title);
+        $items = \App\Province::all();
+        foreach($items as $item){
+            $form = [];
+            $form[] = $item->id;
+            $form[] = $item->name;
+            $form[] = $item->booked_limit_num;
+            $form[] = $item->booked_num;
+            fputcsv($handle, $form);
+        }
+        fclose($handle);
+        $headers = array(
+            'Content-Type' => 'application/csv',
+            'Content-Transfer-Encoding' => 'binary; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename={$fileName}.txt'
+        );
+        return \Response::download($filename, '省份-'.date('Ymd').'.csv', $headers);
+    }
     /**
      * Show the form for creating a new resource.
      *

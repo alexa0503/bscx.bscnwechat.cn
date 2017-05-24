@@ -98,6 +98,8 @@ Route::group(['middleware' => ['role:superadmin,global privileges','menu'],'pref
     Route::resource('form', 'Admin\FormController',['except'=>'index']);
     Route::resource('lottery', 'Admin\LotteryController');
     Route::resource('setting', 'Admin\LotterySettingController');
+
+    Route::get('/province/export', 'Admin\ProvinceController@export')->name('province.export');
     Route::resource('province', 'Admin\ProvinceController');
     Route::resource('city', 'Admin\CityController');
     Route::resource('area', 'Admin\AreaController');
