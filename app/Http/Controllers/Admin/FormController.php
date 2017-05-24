@@ -36,6 +36,7 @@ class FormController extends Controller
     {
         $filename = "downloads/".date("ymdhis").".csv";
         $handle = fopen($filename, 'w+');
+        fputs($handle, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
         $title = ['id','姓名','手机号','性别','车牌号','店铺','省份','城市','区','地址','是否领奖','是否失效','更改预约次数','预约日期','机油','核销时间','IP','创建时间'];
         fputcsv($handle, $title);
         $items = \App\Form::all();
@@ -63,7 +64,9 @@ class FormController extends Controller
         }
         fclose($handle);
         $headers = array(
-            'Content-Type' => 'text/csv',
+            'Content-Type' => 'application/csv',
+            'Content-Transfer-Encoding' => 'binary; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename={$fileName}.txt'
         );
         return \Response::download($filename, '预约表单-'.date('Ymd').'.csv', $headers);
     }

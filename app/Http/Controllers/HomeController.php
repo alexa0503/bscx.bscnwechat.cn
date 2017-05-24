@@ -36,19 +36,19 @@ class HomeController extends Controller
     //信息提交
     public function formPost(Request $request){
         if( null == $request->session()->get('lottery.id')){
-            return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
+            //return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
         $lottery_id = $request->session()->get('lottery.id');
         $lottery = \App\Lottery::find($lottery_id);
 
         if( null == $lottery || $lottery->is_winned != 1 ){
-            return ['ret'=>1003,'msg'=>['error'=>'您并没有中奖，无法填写信息~']];
+            //return ['ret'=>1003,'msg'=>['error'=>'您并没有中奖，无法填写信息~']];
         }
         elseif( $lottery->is_booked == 1 ){
-            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
+            //return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
         }
         elseif( $lottery->is_invalid == 1 ){
-            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
+            //return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
         }
         $messages = [
             'name.required' => '请正确输入姓名',
@@ -60,8 +60,9 @@ class HomeController extends Controller
         ];
         $validator = \Validator::make($request->all(), [
             'name' => 'required',
-            'mobile' => 'required|regex:/^1[0-9]{10}/',
-            'plate_number' => 'required|max:20',
+            'mobile' => 'required|regex:/^1[0-9]{10}$/i',
+            //'plate_number' => ['regex:/^(沪|皖)[a-z][a-z|0-9]{5,6}$/i'],
+            'plate_number' => 'required|max:8',
             'shop' => 'required',
             'oil_info' => 'required',
             'booking_date' => 'required|date',
@@ -81,8 +82,11 @@ class HomeController extends Controller
             if( null == $shop || $province->booked_limit_num <= $province->booked_num ){
                 return ['ret'=>1005, 'msg'=>['shop'=>'该门店已经无法预约了']];
             }
-            $count = \App\Form::where('shop_id',$request->input('shop'))->where('booking_date',$request->input('booking_date'))->count();
-            if( $count >= 4 ){
+            $count = \App\Form::where('shop_id',$request->input('shop'))
+                ->where('booking_date',$request->input('booking_date'))
+                ->count();
+            //门店限制
+            if( ($request->input('shop') != 174 && $count >= 4) || ($request->input('shop') == 174 && $count >= 10 ) ){
                 return ['ret'=>1005, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
             }
             $form = new \App\Form;
