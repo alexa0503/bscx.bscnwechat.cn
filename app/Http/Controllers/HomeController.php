@@ -35,9 +35,7 @@ class HomeController extends Controller
     }
     //信息提交
     public function formPost(Request $request){
-        if ($validator->fails()) {
-            return ['ret'=>1001,'msg'=>$validator->errors()->toArray()];
-        }
+        
         if( null == $request->session()->get('lottery.id')){
             return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
@@ -89,7 +87,9 @@ class HomeController extends Controller
                 ->where('booking_date',$request->input('booking_date'))
                 ->count();
             //门店限制
-            if( ($request->input('shop') != 174 && $count >= 4) || ($request->input('shop') == 174 && $count >= 10 ) ){
+            $more_limit_shops = [174];
+
+            if( (!in_array($request->input('shop'),$more_limit_shops) && $count >= 4) || (in_array($request->input('shop'),$more_limit_shops) && $count >= 10 ) ){
                 return ['ret'=>1005, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
             }
             $form = new \App\Form;
