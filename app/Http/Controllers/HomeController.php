@@ -178,7 +178,7 @@ class HomeController extends Controller
         $area_ids = $shops->unique('area_id')->map(function($item){
             return $item->area_id;
         })->toArray();
-
+        /*
         if($type == 'subscribed'){
             $provinces = \App\Province::whereIn('id',$province_ids)
                 ->whereRaw('booked_limit_num > booked_num')
@@ -188,6 +188,9 @@ class HomeController extends Controller
             $provinces = \App\Province::whereIn('id',$province_ids)
                 ->get();
         }
+        */
+        $provinces = \App\Province::whereIn('id',$province_ids)
+            ->get();
 
         $data = $provinces->map(function($item) use($city_ids,$area_ids){
             $cities = $item->cities->whereIn('id',$city_ids)->map(function($item) use($area_ids){
