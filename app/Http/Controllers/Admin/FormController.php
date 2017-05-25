@@ -14,19 +14,22 @@ class FormController extends Controller
      */
     public function index(Request $request, $type = null)
     {
+        $model = \App\Form::where('name', 'like', '%'.$request->input('keywords').'%');
         if( $type == 'received' ){
-            $items = \App\Form::whereHas('lottery',function($query){
+            $items = $model->whereHas('lottery',function($query){
                 $query->where('is_received',1);
             })->paginate(20);
         }
         elseif( $type == 'invalid' ){
-            $items = \App\Form::whereHas('lottery',function($query){
+            $items = $model->whereHas('lottery',function($query){
                 $query->where('is_invalid',1);
             })->paginate(20);
         }
         else{
-            $items = \App\Form::paginate(20);
+            $items = $model->paginate(20);
         }
+
+
 
         return view('admin.form.index',[
             'items' => $items,
