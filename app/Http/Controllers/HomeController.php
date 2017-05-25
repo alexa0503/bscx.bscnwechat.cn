@@ -71,13 +71,19 @@ class HomeController extends Controller
         if ($validator->fails()) {
             return ['ret'=>1001,'msg'=>$validator->errors()->toArray()];
         }
-        $count = \App\Form::where('mobile',$request->input('mobile'))->count();
-        if( $count > 0){
-            return ['ret'=>1002,'msg'=>['mobile'=>'该手机号码已获得过免费换机油服务，请更换手机号码重新参与活动。']];
-        }
 
         \DB::beginTransaction();
         try {
+            $count_plate_number = \App\Form::where('plate_number',$request->input('plate_number'))->count();
+            if( $count_plate_number > 0){
+                return ['ret'=>1007,'msg'=>['plate_number'=>'该车牌号码已经被使用过了。']];
+            }
+
+            $count = \App\Form::where('mobile',$request->input('mobile'))->count();
+            if( $count > 0){
+                return ['ret'=>1002,'msg'=>['mobile'=>'该手机号码已获得过免费换机油服务，请更换手机号码重新参与活动。']];
+            }
+
             $shop = \App\Shop::find($request->input('shop'));
             $province = $shop->province;
             if( null == $shop || $province->booked_limit_num <= $province->booked_num ){
@@ -90,7 +96,7 @@ class HomeController extends Controller
             $more_limit_shops = [174];
 
             if( (!in_array($request->input('shop'),$more_limit_shops) && $count >= 4) || (in_array($request->input('shop'),$more_limit_shops) && $count >= 10 ) ){
-                return ['ret'=>1005, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
+                return ['ret'=>1006, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
             }
             $form = new \App\Form;
             $form->lottery_id = $lottery_id;
