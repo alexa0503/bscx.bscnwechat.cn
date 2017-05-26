@@ -47,6 +47,16 @@
                             <label class="help-block" for="" id="help-send"></label>
                         </div><!-- /.col -->
                     </div><!-- /form-group -->
+                    <div class="form-group">
+                        <label for="send_msg" class="col-lg-2 control-label">发送给工作人员</label>
+                        <div class="col-lg-10">
+                            <div class="custom-checkbox">
+								<input type="checkbox" value="1" name="send_to_clerk" id="chk2">
+								<label for="chk2"></label>
+							</div>
+                            <label class="help-block" for="" id="help-send"></label>
+                        </div><!-- /.col -->
+                    </div><!-- /form-group -->
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button type="submit" class="btn btn-success btn-sm">提交</button>

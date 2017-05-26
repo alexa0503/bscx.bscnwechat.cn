@@ -143,31 +143,17 @@ class FormController extends Controller
         $form->mobile = $request->mobile;
         $form->booking_date = $request->booking_date;
         $form->save();
+        //重新发送短信
         if( $request->send_msg && $request->send_msg == 1 ){
-            $shop = \App\Shop::find($form->shop_id);
-            $msg_mobile = $form->mobile;
-            $form_url = url('/coupon',[
-                'id' => $form->id,
-                'key' => substr(md5($form->mobile),5,17),
-            ]);
-            $msg_content = '您已成功更改免费换机油服务的预约信息，预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address.'）。您已无法再次修改预约时间，请您按照预约日期前往门店更换机油，逾期作废，感谢您的参与！';
-
-            $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
-            file_get_contents($url);
-            //店铺短信
-            if( env('APP_ENV') == 'dev' ){
-                $msg_mobile = '15618892632';
-            }
-            else{
-                $msg_mobile = $shop->contact_mobile;
-            }
-            $shop_url = url('/flow',[
-                'id' => $form->shop_id,
-                'key' => substr(md5($shop->contact_mobile),5,17),
-            ]);
-            $msg_content = '您好，'.$form->booking_date.'将有1位手机尾号为：'.substr($form->mobile,-4).'的用户光顾车之翼（'.$shop->name.'）店铺体验更换机油服务（'.$form->oil_info.'），请在用户到店后按此步骤操作：第一步：打开此链（'.$shop_url.'）；第二步：截图保存页面上的二维码；第三步：打开微信，在微信右上角的扫一扫中，打开相册扫描二维码；第四步，进入核销页面后扫描顾客提供的二维码进行核销；谢谢。';
-            $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
-            file_get_contents($url);
+            $this->sendMsg($form,'users');
+            $this->sendMsg($form,'clerks');
+        }
+        //发送给店员
+        if( $request->send_to_clerk && $request->send_to_clerk == 1 ){
+            $mobile = '18621534023';
+            //$mobile = '15618892632';
+            $this->sendMsg($form,'users', $mobile);
+            $this->sendMsg($form,'clerks', $mobile);
         }
         return ['ret'=>0,'url'=>route('form.index')];
     }
@@ -181,5 +167,30 @@ class FormController extends Controller
     public function destroy($id)
     {
         //
+    }
+    protected function sendMsg($form, $to = 'users', $mobile = null)
+    {
+        $shop = \App\Shop::find($form->shop_id);
+        if( $to == 'users' ){
+            $msg_mobile = $mobile ? : $form->mobile;
+            $form_url = url('/coupon',[
+                'id' => $form->id,
+                'key' => substr(md5($form->mobile),5,17),
+            ]);
+            $msg_content = '您已成功更改免费换机油服务的预约信息，预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address.'）。您已无法再次修改预约时间，请您按照预约日期前往门店更换机油，逾期作废，感谢您的参与！';
+        }
+        else{
+            $msg_mobile = $mobile ? : $shop->contact_mobile;
+            $shop_url = url('/flow',[
+                'id' => $form->shop_id,
+                'key' => substr(md5($shop->contact_mobile),5,17),
+            ]);
+            $msg_content = '您好，'.$form->booking_date.'将有1位手机尾号为：'.substr($form->mobile,-4).'的用户光顾车之翼（'.$shop->name.'）店铺体验更换机油服务（'.$form->oil_info.'），请在用户到店后按此步骤操作：第一步：打开此链（'.$shop_url.'）；第二步：截图保存页面上的二维码；第三步：打开微信，在微信右上角的扫一扫中，打开相册扫描二维码；第四步，进入核销页面后扫描顾客提供的二维码进行核销；谢谢。';
+        }
+
+        $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
+        \Log::useDailyFiles(storage_path('logs/'.$to.'-send.log'));
+        \Log::info('mobile:'.$msg_mobile.', content:'.$msg_content);
+        file_get_contents($url);
     }
 }
