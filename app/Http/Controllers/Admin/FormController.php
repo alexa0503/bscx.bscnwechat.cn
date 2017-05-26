@@ -40,7 +40,7 @@ class FormController extends Controller
         $filename = "downloads/".date("ymdhis").".csv";
         $handle = fopen($filename, 'w+');
         fputs($handle, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
-        $title = ['id','姓名','手机号','性别','车牌号','店铺','省份','城市','区','地址','是否领奖','是否失效','更改预约次数','预约日期','机油','核销时间','IP','创建时间'];
+        $title = ['id','姓名','手机号','性别','车牌号','店铺分公司','店铺新代理商名称','店铺','省份','城市','区','地址','是否领奖','是否失效','更改预约次数','预约日期','机油','核销时间','IP','创建时间'];
         fputcsv($handle, $title);
         $items = \App\Form::all();
         foreach($items as $item){
@@ -50,6 +50,8 @@ class FormController extends Controller
             $form[] = $item->mobile;
             $form[] = $item->sex;
             $form[] = $item->plate_number;
+            $form[] = $item->shop->branch_name;
+            $form[] = $item->shop->agent_name;
             $form[] = $item->shop->name;
             $form[] = $item->shop->province->name;
             $form[] = $item->shop->city->name;
@@ -166,7 +168,6 @@ class FormController extends Controller
         //发送给店员
         if( $request->send_to_clerk && $request->send_to_clerk == 1 ){
             $mobile = '18621534023';
-            //$mobile = '15618892632';
             $this->sendMsg($form,'users', $mobile);
             $this->sendMsg($form,'clerks', $mobile);
         }
@@ -208,6 +209,6 @@ class FormController extends Controller
         $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
         \Log::useDailyFiles(storage_path('logs/'.$to.'-send.log'));
         \Log::info('mobile:'.$msg_mobile.', content:'.$msg_content);
-        file_get_contents($url);
+        @file_get_contents($url);
     }
 }

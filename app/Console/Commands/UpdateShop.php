@@ -39,14 +39,27 @@ class UpdateShop extends Command
     {
         $contents = \Storage::get('bscx.csv');
         $lines = explode("\n", $contents);
+        $i = 0;
         foreach($lines as $v){
             $arr = explode(",", $v);
+            $count = \App\Shop::where('name', $arr[2])->count();
+            if($count > 1 || $count == 0){
+                continue;
+            }
+            $shop = \App\Shop::where('name', $arr[2])->first();
+            $shop->branch_name = $arr[0];
+            $shop->agent_name = $arr[1];
+            $shop->save();
+            $this->info($shop->name.','.$shop->branch_name.','.$shop->agent_name);
+            ++$i;
+
+            //echo $arr[0],$arr[1],$arr[2],$arr[3],$arr[4],$arr[5],$arr[6],$arr[7],"\n";
+            //continue;
+            /*
             $count = \App\Shop::where('name', $arr[1])->count();
             if($count > 0){
                 continue;
             }
-            //echo $arr[0],$arr[1],$arr[2],$arr[3],$arr[4],$arr[5],$arr[6],$arr[7],"\n";
-            //continue;
             $shop = new \App\Shop;
             $shop->code = $arr[0];
             $shop->name = $arr[1];
@@ -83,7 +96,10 @@ class UpdateShop extends Command
             $shop->contact_mobile = $arr[6];
             $shop->oil_info = $arr[7];
             $shop->save();
+            */
+
         }
+        $this->info("总共有$i 家店铺更新成功");
         //$contents = file_get_contents('csv');
     }
 }

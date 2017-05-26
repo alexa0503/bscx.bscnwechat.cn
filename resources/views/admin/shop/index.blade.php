@@ -23,6 +23,8 @@
 	      		<thead>
 	        		<tr>
 			        	<th>ID</th>
+			          	<th>分公司</th>
+			          	<th>新代理商名称</th>
 			          	<th>店铺名</th>
 			          	<th>编号</th>
 			          	<th>省/市/区</th>
@@ -40,6 +42,8 @@
                     @foreach($items as $item)
 		        	<tr>
 			          	<td>{{$item->id}}</td>
+			          	<td>{{$item->branch_name}}</td>
+			          	<td>{{$item->agent_name}}</td>
 			          	<td>{{$item->name}}</td>
 			          	<td>{{$item->code}}</td>
 			          	<td>{{$item->province->name}}/{{$item->city->name}}/{{$item->area->name}}</td>
