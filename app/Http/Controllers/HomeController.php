@@ -76,17 +76,20 @@ class HomeController extends Controller
         try {
             $count_plate_number = \App\Form::where('plate_number',$request->input('plate_number'))->count();
             if( $count_plate_number > 0){
+                \DB::commit();
                 return ['ret'=>1007,'msg'=>['plate_number'=>'该车牌号码已经被使用过了。']];
             }
 
             $count = \App\Form::where('mobile',$request->input('mobile'))->count();
             if( $count > 0){
+                \DB::commit();
                 return ['ret'=>1002,'msg'=>['mobile'=>'该手机号码已获得过免费换机油服务，请更换手机号码重新参与活动。']];
             }
 
             $shop = \App\Shop::find($request->input('shop'));
             $province = $shop->province;
             if( null == $shop || $province->booked_limit_num <= $province->booked_num ){
+                \DB::commit();
                 return ['ret'=>1005, 'msg'=>['shop'=>'该门店已经无法预约了']];
             }
             $count = \App\Form::where('shop_id',$request->input('shop'))
