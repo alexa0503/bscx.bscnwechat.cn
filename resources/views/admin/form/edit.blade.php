@@ -21,7 +21,7 @@
                     <div class="form-group">
                         <label for="" class="col-lg-2 control-label">车牌</label>
                         <div class="col-lg-10">
-                            <input type="text" value="{{$item->plate_number}}" class="form-control" disabled="disabled">
+                            <input type="text" value="{{$item->plate_number}}" name="plate_number" class="form-control">
                         </div><!-- /.col -->
                     </div><!-- /form-group -->
                     <div class="form-group">

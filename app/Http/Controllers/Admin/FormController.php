@@ -142,6 +142,7 @@ class FormController extends Controller
         }
         $form->mobile = $request->mobile;
         $form->booking_date = $request->booking_date;
+        $form->plate_number = $request->plate_number;
 
         if($request->check_status == 1){
             $lottery = $form->lottery;
@@ -187,6 +188,7 @@ class FormController extends Controller
         $shop = \App\Shop::find($form->shop_id);
         if( $to == 'users' ){
             $msg_mobile = $mobile ? : $form->mobile;
+            //$msg_mobile = '15618892632';
             $form_url = url('/coupon',[
                 'id' => $form->id,
                 'key' => substr(md5($form->mobile),5,17),
@@ -195,6 +197,7 @@ class FormController extends Controller
         }
         else{
             $msg_mobile = $mobile ? : $shop->contact_mobile;
+            //$msg_mobile = '15618892632';
             $shop_url = url('/flow',[
                 'id' => $form->shop_id,
                 'key' => substr(md5($shop->contact_mobile),5,17),
