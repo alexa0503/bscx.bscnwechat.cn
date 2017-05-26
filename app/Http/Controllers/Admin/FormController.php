@@ -142,6 +142,20 @@ class FormController extends Controller
         }
         $form->mobile = $request->mobile;
         $form->booking_date = $request->booking_date;
+
+        if($request->check_status == 1){
+            $lottery = $form->lottery;
+            $lottery->is_received = 1;
+            $lottery->save();
+            $form->check_date = \Carbon\Carbon::now();
+        }
+        elseif($request->check_status == 2){
+            $lottery = $form->lottery;
+            $lottery->is_received = 0;
+            $lottery->is_invalid = 1;
+            $lottery->save();
+            $form->check_date = NULL;
+        }
         $form->save();
         //重新发送短信
         if( $request->send_msg && $request->send_msg == 1 ){

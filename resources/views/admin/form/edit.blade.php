@@ -48,7 +48,7 @@
                         </div><!-- /.col -->
                     </div><!-- /form-group -->
                     <div class="form-group">
-                        <label for="send_msg" class="col-lg-2 control-label">发送给工作人员</label>
+                        <label for="send_to_clerk" class="col-lg-2 control-label">发送给工作人员</label>
                         <div class="col-lg-10">
                             <div class="custom-checkbox">
 								<input type="checkbox" value="1" name="send_to_clerk" id="chk2">
@@ -57,6 +57,17 @@
                             <label class="help-block" for="" id="help-send"></label>
                         </div><!-- /.col -->
                     </div><!-- /form-group -->
+                    <div class="form-group">
+						<label for="check_status" class="col-lg-2 control-label">表单状态</label>
+						<div class="col-lg-10">
+							<select name="check_status" class="form-control">
+                                <option value="">保持现有状态</option>
+                                <option value="1">更改为已核销</option>
+                                <option value="2">更改为失效</option>
+                            </select>
+                            <label class="help-block" for="" id="help-lottery_date"></label>
+						</div><!-- /.col -->
+					</div><!-- /form-group -->
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button type="submit" class="btn btn-success btn-sm">提交</button>

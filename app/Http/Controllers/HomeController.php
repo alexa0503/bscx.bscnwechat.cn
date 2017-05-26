@@ -254,10 +254,15 @@ class HomeController extends Controller
                 $return = ['ret'=>1003,'msg'=>'未中奖'];
             }
             else{
-                $seed = ceil(10000/$today_setting->winning_odds);
-                $rand1 = rand(1, $seed);
-                $rand2 = rand(1, $seed);
-                $lottery->is_winned = $rand1 == $rand2 ? 1 : 0;
+                if( $today_setting->winning_odds == 0 ){
+                    $return = ['ret'=>1004,'msg'=>'未中奖'];
+                }
+                else{
+                    $seed = ceil(10000/$today_setting->winning_odds);
+                    $rand1 = rand(1, $seed);
+                    $rand2 = rand(1, $seed);
+                    $lottery->is_winned = $rand1 == $rand2 ? 1 : 0;
+                }
                 $return = ['ret'=>1004,'msg'=>'未中奖'];
             }
             $lottery->created_ip = $request->ip();

@@ -60,11 +60,7 @@ $today = \Carbon\Carbon::today()->timestamp;
                         <td>{{$item->lottery->created_ip}}</td>
 			          	<td>{{$item->created_at}}</td>
 						<th>
-							@if($item->lottery->is_invalid == 0)
-							<a href="{{route('form.edit',$item->id)}}" class="btn btn-default btn-sm">更改预约日期</a>
-							@else
-							--
-							@endif</th>
+							<a href="{{route('form.edit',$item->id)}}" class="btn btn-default btn-sm">更新</a></th>
 		        	</tr>
                     @endforeach
 		      	</tbody>
