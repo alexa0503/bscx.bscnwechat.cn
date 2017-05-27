@@ -207,8 +207,8 @@ class FormController extends Controller
         }
 
         $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
-        \Log::useDailyFiles(storage_path('logs/'.$to.'-send.log'));
-        \Log::info('mobile:'.$msg_mobile.', content:'.$msg_content);
-        @file_get_contents($url);
+        //\Log::useDailyFiles(storage_path('logs/'.$to.'-send.log'));
+        //\Log::info('mobile:'.$msg_mobile.', content:'.$msg_content);
+        file_get_contents($url);
     }
 }
