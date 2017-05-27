@@ -316,21 +316,23 @@ class HomeController extends Controller
 
         $form = \App\Form::find($result['id']);
         $today = \Carbon\Carbon::today();
-        if( null == $form ){
+        if( null == $form || $form->lottery == null){
             //店铺不匹配
             $hx_class = 'hx_fault';
             $ret = 1100;
-        }elseif( $form->shop_id != $shop_id ){
-            //店铺不匹配
-            $hx_class = 'hx_fault';
-            $ret = 1002;
         }
-        elseif( $form->lottery->is_invalid == 1){
+        elseif( $form->lottery->is_invalid == 1 ){
             //该领奖券已经失效
             return ['ret'=>1005];
             $hx_class = 'hx_fault';
             $ret = 1005;
-        }elseif( $form->lottery->is_received == 1){
+        }
+        elseif( $form->shop_id != $shop_id ){
+            //店铺不匹配
+            $hx_class = 'hx_fault';
+            $ret = 1002;
+        }
+        elseif( $form->lottery->is_received == 1){
             //此二维码已核销
             $hx_class = 'hx_fault';
             $ret = 1003;
