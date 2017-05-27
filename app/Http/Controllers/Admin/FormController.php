@@ -194,7 +194,7 @@ class FormController extends Controller
                 'id' => $form->id,
                 'key' => substr(md5($form->mobile),5,17),
             ]);
-            $msg_content = '您已成功更改免费换机油服务的预约信息，预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address.'）。您已无法再次修改预约时间，请您按照预约日期前往门店更换机油，逾期作废，感谢您的参与！';
+            $msg_content = '您已成功更改免费换机油服务的预约信息，预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address.'）。您已无法再次修改预约时间，请您按照预约日期前往门店更换机油，逾期作废，感谢您的参与！），您的预约码请点击以下地址查看：'.$form_url;
         }
         else{
             $msg_mobile = $mobile ? : $shop->contact_mobile;
