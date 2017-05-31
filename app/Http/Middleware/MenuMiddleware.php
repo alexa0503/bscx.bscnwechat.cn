@@ -36,20 +36,20 @@ class MenuMiddleware
             $lottery->add('中奖记录', ['url'=>route('lottery.index',['is_winned'=>1]),'class'=>'bg-palette4']);
             $lottery->add('所有记录', ['url'=>route('lottery.index'),'class'=>'bg-palette4']);
 
-            $menu1 = $menu->add('店铺相关', ['url'=>'#','class'=>'openable bg-palette2']);
-            $province = $menu1->add('省份管理', ['url'=>route('province.index'),'class'=>'openable bg-palette2']);
-            $province->add('查看',['url'=>route('province.index')]);
-            $province->add('添加',['url'=>route('province.create')]);
+            $menu->add('省份管理', ['url'=>route('province.index'),'class'=>'bg-palette2']);
+            //$province = $menu1->add('省份管理', ['url'=>route('province.index'),'class'=>'openable bg-palette2']);
+            //$province->add('查看',['url'=>route('province.index')]);
+            //$province->add('添加',['url'=>route('province.create')]);
 
-            $city = $menu1->add('城市管理', ['url'=>'#','class'=>'openable bg-palette2']);
-            $city->add('查看',['url'=>route('city.index')]);
-            $city->add('添加',['url'=>route('city.create')]);
+            //$city = $menu1->add('城市管理', ['url'=>'#','class'=>'openable bg-palette2']);
+            //$city->add('查看',['url'=>route('city.index')]);
+            //$city->add('添加',['url'=>route('city.create')]);
 
-            $area = $menu1->add('地区管理', ['url'=>'#','class'=>'openable bg-palette2']);
-            $area->add('查看',['url'=>route('area.index')]);
-            $area->add('添加',['url'=>route('area.create')]);
+            //$area = $menu1->add('地区管理', ['url'=>'#','class'=>'openable bg-palette2']);
+            //$area->add('查看',['url'=>route('area.index')]);
+            //$area->add('添加',['url'=>route('area.create')]);
 
-            $shop = $menu1->add('店铺管理', ['url'=>'#','class'=>'openable bg-palette2']);
+            $shop = $menu->add('店铺管理', ['url'=>'#','class'=>'openable bg-palette2']);
             $shop->add('查看所有店铺',['url'=>route('shop.index')]);
             $shop->add('可查询店铺',['url'=>route('shop.index',['is_searched'=>1])]);
             $shop->add('可预约店铺',['url'=>route('shop.index',['is_subscribed'=>1])]);
