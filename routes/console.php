@@ -16,7 +16,7 @@ use Illuminate\Foundation\Inspiring;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->describe('Display an inspiring quote');
-Artisan::command('update:province', function(){
+Artisan::command('update:provinces', function(){
     $province_booked_nums = [];
     $forms = \App\Form::whereHas('lottery',function($query){
         $query->where('is_invalid',0);
@@ -31,7 +31,7 @@ Artisan::command('update:province', function(){
     }
     foreach( $province_booked_nums as $id=>$province_booked_num){
         $province = \App\Province::find($id);
-        $province->province_booked_num = $province_booked_num;
+        $province->booked_num = $province_booked_num;
         $province->save();
         $this->info($province->name.'('.$id.'): '.$province_booked_num);
     }

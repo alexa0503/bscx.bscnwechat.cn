@@ -32,6 +32,8 @@ class Kernel extends ConsoleKernel
                 ->dailyAt('17:00');
         $schedule->command('send:message')
                 ->dailyAt('10:00');
+        $schedule->command('update:provinces')
+                ->dailyAt('03:00');
     }
 
     /**
