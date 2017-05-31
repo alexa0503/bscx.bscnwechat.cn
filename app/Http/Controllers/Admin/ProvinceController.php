@@ -82,7 +82,9 @@ class ProvinceController extends Controller
      */
     public function edit($id)
     {
-        //
+        return view('admin.province.edit',[
+            'item'=>\App\Province::find($id)
+        ]);
     }
 
     /**
@@ -94,7 +96,18 @@ class ProvinceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validator = \Validator::make($request->all(), [
+            'name' => 'required',
+            'booked_limit_num' => 'required|numeric',
+        ]);
+        if ($validator->fails()) {
+            return response($validator->errors(),422);
+        }
+        $province = \App\Province::find($id);
+        $province->name = $request->name;
+        $province->booked_limit_num = $request->booked_limit_num;
+        $province->save();
+        return ['ret'=>0,'url'=>route('province.index')];
     }
 
     /**

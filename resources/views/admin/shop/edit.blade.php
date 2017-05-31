@@ -99,7 +99,13 @@
                             <label class="help-block" for="" id="help-is_subscribed"></label>
 						</div><!-- /.col -->
 					</div><!-- /form-group -->
-
+                    <div class="form-group">
+                        <label for="name" class="col-lg-2 control-label">预约每天限制数量</label>
+                        <div class="col-lg-10">
+                            <input value="{{$item->booked_limit_num}}" name="booked_limit_num" type="text" class="form-control" id="name" placeholder="请输入预约每天限制数量">
+                            <label class="help-block" for="" id="help-name"></label>
+                        </div><!-- /.col -->
+                    </div><!-- /form-group -->
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button type="submit" class="btn btn-success btn-sm">提交</button>
@@ -195,7 +201,7 @@ $.cityChange = function(id){
         error: function(xhr){
             var json = jQuery.parseJSON(xhr.responseText);
             if (xhr.status == 200){
-                $('#login-form').modal('hide');
+                $('#post-form').modal('hide');
                 location.href= json.url;
             }
             $('.help-block').html('');

@@ -96,9 +96,8 @@ class HomeController extends Controller
                 ->where('booking_date',$request->input('booking_date'))
                 ->count();
             //门店限制
-            $more_limit_shops = [174];
-
-            if( (!in_array($request->input('shop'),$more_limit_shops) && $count >= 4) || (in_array($request->input('shop'),$more_limit_shops) && $count >= 10 ) ){
+            if( $count >= $shop->booked_limit_num ){
+                \DB::commit();
                 return ['ret'=>1006, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
             }
             $form = new \App\Form;
@@ -270,7 +269,7 @@ class HomeController extends Controller
                     $rand2 = rand(1, $seed);
                     $lottery->is_winned = $rand1 == $rand2 ? 1 : 0;
                 }
-                $return = ['ret'=>1004,'msg'=>'未中奖'];
+                $return = ['ret'=>1005,'msg'=>'未中奖'];
             }
             $lottery->created_ip = $request->ip();
             $lottery->save();
@@ -288,7 +287,7 @@ class HomeController extends Controller
             \DB::commit();
         } catch (Exception $e) {
             \DB::rollBack();
-            $return = ['ret'=>1005, 'msg'=>$e->getMessage()];
+            $return = ['ret'=>1006, 'msg'=>$e->getMessage()];
         }
         return $return;
     }

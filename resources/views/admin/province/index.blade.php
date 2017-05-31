@@ -19,6 +19,7 @@
 			          	<th>名称</th>
 			          	<th>预订限制</th>
 			          	<th>已预订</th>
+			          	<th>操作</th>
 	        		</tr>
 	      		</thead>
 	      		<tbody>
@@ -28,6 +29,8 @@
                         <td>{{$item->name}}</td>
 			          	<td>{{$item->booked_limit_num}}</td>
 			          	<td>{{$item->booked_num}}</td>
+						<td>
+							<a href="{{route('province.edit',['id'=>$item->id])}}" class="btn btn-default btn-sm">编辑</a></td>
 		        	</tr>
                     @endforeach
 		      	</tbody>

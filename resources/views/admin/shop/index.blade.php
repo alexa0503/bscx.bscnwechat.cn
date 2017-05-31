@@ -33,7 +33,7 @@
 			          	<th>机油</th>
 			          	<th>查询状态</th>
 			          	<th>预订状态</th>
-			          	<th>已预订数</th>
+			          	<th>限制预订数</th>
 			          	<th>浏览数</th>
 			          	<th>操作</th>
 	        		</tr>
@@ -52,7 +52,7 @@
                         <td>{{$item->oil_info}}</td>
                         <td>{{$item->is_searched == 1 ? '是' : '否'}}</td>
                         <td>{{$item->is_subscribed == 1 ? '是' : '否'}}</td>
-                        <td>{{$item->subscribed_num}}</td>
+                        <td>{{$item->booked_limit_num}}</td>
                         <td>{{$item->views}}</td>
                         <td>
 							<a href="{{route('shop.edit',['id'=>$item->id])}}" class="btn btn-default btn-sm">编辑</a>

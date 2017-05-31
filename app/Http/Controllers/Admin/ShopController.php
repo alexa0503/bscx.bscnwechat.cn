@@ -100,6 +100,7 @@ class ShopController extends Controller
             }
 
             $shop->name = $request->input('name');
+            $shop->booked_limit_num = $request->input('booked_limit_num');
             $shop->code = $request->input('code');
             $shop->address = $request->input('address');
             $shop->is_searched = $request->input('is_searched');
@@ -201,6 +202,7 @@ class ShopController extends Controller
             }
 
             $shop->name = $request->input('name');
+            $shop->booked_limit_num = $request->input('booked_limit_num');
             $shop->code = $request->input('code');
             $shop->address = $request->input('address');
             $shop->is_searched = $request->input('is_searched');
