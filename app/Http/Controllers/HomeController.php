@@ -234,12 +234,12 @@ class HomeController extends Controller
                 return ['ret'=>0,'msg'=>'恭喜'];
             }
         }
-        
+
         $url = 'http://ip.taobao.com/service/getIpInfo.php?ip='.$request->ip();
         $return = json_decode(file_get_contents($url));
         $province = \App\Province::where('name', $return->data->region)->first();
-        if($province == null || $province->booked_limit_num >= $province->booked_num){
-            return ['ret'=>1001,'msg'=>'未中奖'];
+        if($province == null || $province->booked_limit_num <= $province->booked_num){
+            return ['ret'=>1010,'msg'=>'未中奖'];
         }
 
         $now = \Carbon\Carbon::now();
