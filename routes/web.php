@@ -60,30 +60,13 @@ Route::get('/test/qr/flow/{id}', function($id){
         'key' => substr(md5($shop->contact_mobile),5,17),
     ]);
 });
-Route::get('sendsms', function(){
-    $form = \App\Form::find(2);
-    $shop = \App\Shop::find($form->shop_id);
-
-    $data = $form->toArray();
-    $data['shop_name'] = $shop->name;
-    $data['address'] = $shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address;
-
-    $file = 'qr/'.$form->id.'.svg';
-    $path = public_path($file);
-    $content = url('/coupon',['id'=>$form->id,'key'=>substr(md5($form->mobile),5,17)]);
-    \QrCode::size(600)->margin(0)->generate($content, $path);
-    $data['qr_code'] = url($file);
-    //发送短信
-    //用户短信
-    $msg_mobile = $form->mobile;
-    $form_url = url('/flow',[
-        'id' => $form->id,
-        'key' => substr(md5($form->mobile),5,17),
-    ]);
-    '感谢您参与普利司通春季促销活动，您已成功预约免费更换机油服务。预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$data['address'].'），您的预约码请点击以下地址查看：'.$form_url.'，请您务必在预约日期当天前往预约门店更换机油，逾期作废。';
-    $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
-    $result = file_get_contents($url);
-    return $result;
+Route::get('/test/ip', function(Illuminate\Http\Request $request){
+    $url = 'http://ip.taobao.com/service/getIpInfo.php?ip='.$request->ip();
+    $return = json_decode(file_get_contents($url));
+    $province = \App\Province::where('name', $return->data->region)->first();
+    if($province == null || $province->booked_limit_num >= $province->booked_num){
+        return ['ret'=>1001,'msg'=>'未中奖'];
+    }
 });
 
 
