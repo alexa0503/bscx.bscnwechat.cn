@@ -4,6 +4,8 @@
 @php
 $shop = \App\Shop::select(\DB::raw('SUM(views) AS total'))->first();
 $total = $shop->total;
+$today = \Carbon\Carbon::today();
+$today_booked_num = \App\Form::where('booking_date', $today->toDateString())->count();
 @endphp
     <div class="padding-md">
         <!--
@@ -35,10 +37,10 @@ $total = $shop->total;
         </div>
         -->
         <div class="row m-top-md">
-            <div class="col-lg-12 col-sm-12">
+            <div class="col-lg-6 col-sm-12">
                 <div class="statistic-box bg-danger m-bottom-md">
                     <div class="statistic-title">
-                        Total Views
+                        店铺总访问量
                     </div>
 
                     <div class="statistic-value">
@@ -53,23 +55,23 @@ $total = $shop->total;
                 </div>
             </div>
 
-            <!--<div class="col-lg-6 col-sm-12">
+            <div class="col-lg-6 col-sm-12">
                 <div class="statistic-box bg-purple m-bottom-md">
                     <div class="statistic-title">
-                        Today Users
+                        今天预约数
                     </div>
 
                     <div class="statistic-value">
-                        129
+                        {{$today_booked_num}}
                     </div>
 
-                    <div class="m-top-md">3% Higher than last week</div>
+                    <div class="m-top-md"></div>
 
                     <div class="statistic-icon-background">
                         <i class="ion-person-add"></i>
                     </div>
                 </div>
-            </div>-->
+            </div>
         </div>
     </div><!-- ./padding-md -->
 @endsection
