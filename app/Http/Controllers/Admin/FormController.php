@@ -40,7 +40,7 @@ class FormController extends Controller
         $filename = "downloads/".date("ymdhis").".csv";
         $handle = fopen($filename, 'w+');
         fputs($handle, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
-        $title = ['id','姓名','手机号','性别','车牌号','店铺分公司','店铺新代理商名称','店铺','省份','城市','区','地址','是否领奖','是否失效','更改预约次数','预约日期','机油','核销时间','IP','创建时间'];
+        $title = ['id','姓名','手机号','性别','车牌号','店铺分公司','店铺新代理商名称','店铺','省份','城市','区','地址','是否领奖','是否失效','更改预约次数','预约日期','机油','核销时间','来源','IP','创建时间'];
         fputcsv($handle, $title);
         $items = \App\Form::all();
         foreach($items as $item){
@@ -63,6 +63,7 @@ class FormController extends Controller
             $form[] = $item->booking_date;
             $form[] = $item->oil_info;
             $form[] = $item->check_date ?: '--';
+            $form[] = $item->source_from ?: '--';
             $form[] = $item->lottery->created_ip;
             $form[] = $item->created_at;
             fputcsv($handle, $form);
