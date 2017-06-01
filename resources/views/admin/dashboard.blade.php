@@ -6,6 +6,10 @@ $shop = \App\Shop::select(\DB::raw('SUM(views) AS total'))->first();
 $total = $shop->total;
 $today = \Carbon\Carbon::today();
 $today_booked_num = \App\Form::where('booking_date', $today->toDateString())->count();
+$today_created_num = \App\Form::where('created_at', '>=', $today->toDateString())->count();
+$has_received_num = \App\Form::whereHas('lottery',function($query){
+        $query->where('is_received',1);
+    })->count();
 @endphp
     <div class="padding-md">
         <!--
@@ -58,11 +62,46 @@ $today_booked_num = \App\Form::where('booking_date', $today->toDateString())->co
             <div class="col-lg-6 col-sm-12">
                 <div class="statistic-box bg-purple m-bottom-md">
                     <div class="statistic-title">
-                        今天预约数
+                        今日预约数
                     </div>
 
                     <div class="statistic-value">
                         {{$today_booked_num}}
+                    </div>
+
+                    <div class="m-top-md"></div>
+
+                    <div class="statistic-icon-background">
+                        <i class="ion-person-add"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-sm-12">
+                <div class="statistic-box bg-primary m-bottom-md">
+                    <div class="statistic-title">
+                        今日创建预约数
+                    </div>
+
+                    <div class="statistic-value">
+                        {{$today_created_num}}
+                    </div>
+
+                    <div class="m-top-md"></div>
+
+                    <div class="statistic-icon-background">
+                        <i class="ion-person-add"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-12">
+                <div class="statistic-box bg-info m-bottom-md">
+                    <div class="statistic-title">
+                        已领取预约数
+                    </div>
+
+                    <div class="statistic-value">
+                        {{$has_received_num}}
                     </div>
 
                     <div class="m-top-md"></div>
