@@ -35,7 +35,6 @@ class HomeController extends Controller
     }
     //信息提交
     public function formPost(Request $request){
-
         if( null == $request->session()->get('lottery.id')){
             return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
@@ -109,6 +108,7 @@ class HomeController extends Controller
             $form->oil_info = $request->input('oil_info');
             $form->booking_date = $request->input('booking_date');
             $form->sex = $request->input('sex');
+            $form->source_from = \Agent::isMobile() ? 'mobile' : 'pc';
             $form->save();
             $lottery->is_booked = 1;
             $lottery->save();
