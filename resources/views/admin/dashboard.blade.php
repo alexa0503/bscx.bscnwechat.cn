@@ -10,6 +10,7 @@ $today_created_num = \App\Form::where('created_at', '>=', $today->toDateString()
 $has_received_num = \App\Form::whereHas('lottery',function($query){
         $query->where('is_received',1);
     })->count();
+$provinces = \App\Province::all();
 @endphp
     <div class="padding-md">
         <!--
@@ -112,6 +113,53 @@ $has_received_num = \App\Form::whereHas('lottery',function($query){
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="smart-widget widget-dark-blue">
+                    <div class="smart-widget-header">
+                        各省份预约表
+                        <span class="smart-widget-option">
+                            <span class="refresh-icon-animated">
+                                <i class="fa fa-circle-o-notch fa-spin"></i>
+                            </span>
+                            <a href="#" class="widget-toggle-hidden-option">
+                                <i class="fa fa-cog"></i>
+                            </a>
+                            <a href="#" class="widget-collapse-option" data-toggle="collapse">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                            <a href="#" class="widget-refresh-option">
+                                <i class="fa fa-refresh"></i>
+                            </a>
+                            <a href="#" class="widget-remove-option">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </span>
+                    </div>
+                    <div class="smart-widget-inner">
+                        <div class="smart-widget-hidden-section">
+                            <ul class="widget-color-list clearfix">
+                                <li style="background-color:#20232b;" data-color="widget-dark"></li>
+                                <li style="background-color:#4c5f70;" data-color="widget-dark-blue"></li>
+                                <li style="background-color:#23b7e5;" data-color="widget-blue"></li>
+                                <li style="background-color:#2baab1;" data-color="widget-green"></li>
+                                <li style="background-color:#edbc6c;" data-color="widget-yellow"></li>
+                                <li style="background-color:#fbc852;" data-color="widget-orange"></li>
+                                <li style="background-color:#e36159;" data-color="widget-red"></li>
+                                <li style="background-color:#7266ba;" data-color="widget-purple"></li>
+                                <li style="background-color:#f5f5f5;" data-color="widget-light-grey"></li>
+                                <li style="background-color:#fff;" data-color="reset"></li>
+                            </ul>
+                        </div>
+                        <div class="smart-widget-body no-padding">
+                            <div class="padding-md">
+                                <div id="totalSalesChart" class="morris-chart" style="height:250px;"></div>
+                            </div>
+                        </div>
+                    </div><!-- ./smart-widget-inner -->
+                </div><!-- ./smart-widget -->
+            </div><!-- ./col -->
+        </div>
     </div><!-- ./padding-md -->
 @endsection
 @section('scripts')
@@ -137,30 +185,46 @@ $has_received_num = \App\Form::whereHas('lottery',function($query){
     <script src="{{asset('js/simplify/simplify_dashboard.js')}}"></script>
     <script>
         $(function()	{
-            $('.chart').easyPieChart({
-                easing: 'easeOutBounce',
-                size: '140',
-                lineWidth: '7',
-                barColor: '#7266ba',
-                onStep: function(from, to, percent) {
-                    $(this.el).find('.percent').text(Math.round(percent));
-                }
-            });
+            var data = [];
+            @foreach($provinces as $province)
+            data.push({ y: '{{$province->name}}', a: {{$province->booked_num}}, b: {{$province->booked_limit_num}} });
+            @endforeach
 
-            $('.sortable-list').sortable();
+        	//Morris Chart (Total Visits)
+        	var totalVisitChart = Morris.Bar({
+        	  element: 'totalSalesChart',
+        	  data: data,
+        	  xkey: 'y',
+        	  ykeys: ['a', 'b'],
+        	  labels: ['预约数', '限额'],
+        	  barColors: ['#333', '#999'],
+        	  grid: false,
+        	  gridTextColor: '#777',
+        	});
 
-            $('.todo-checkbox').click(function()	{
+        	$(window).resize(function(e)	{
+        		// Redraw All Chart
+        		setTimeout(function() {
+        			totalVisitChart.redraw();
+        			//plotWithOptions();
+        		},500);
+        	});
 
-                var _activeCheckbox = $(this).find('input[type="checkbox"]');
+        	$('#sidebarToggleLG').click(function()	{
+        		// Redraw All Chart
+        		setTimeout(function() {
+        			totalVisitChart.redraw();
+        			//plotWithOptions();
+        		},500);
+        	});
 
-                if(_activeCheckbox.is(':checked'))	{
-                    $(this).parent().addClass('selected');
-                }
-                else	{
-                    $(this).parent().removeClass('selected');
-                }
-
-            });
+        	$('#sidebarToggleSM').click(function()	{
+        		// Redraw All Chart
+        		setTimeout(function() {
+        			totalVisitChart.redraw();
+        			//plotWithOptions();
+        		},500);
+        	});
             //Delete Widget Confirmation
             $('#deleteWidgetConfirm').popup({
                 vertical: 'top',
