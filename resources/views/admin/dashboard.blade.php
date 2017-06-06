@@ -98,7 +98,7 @@ $provinces = \App\Province::all();
             <div class="col-lg-6 col-sm-12">
                 <div class="statistic-box bg-info m-bottom-md">
                     <div class="statistic-title">
-                        已领取预约数
+                        已领取预约数(总)
                     </div>
 
                     <div class="statistic-value">

@@ -35,20 +35,9 @@ class HomeController extends Controller
     }
     //信息提交
     public function formPost(Request $request){
-        if( null == $request->session()->get('lottery.id')){
-            return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
-        }
         $lottery_id = $request->session()->get('lottery.id');
-        $lottery = \App\Lottery::find($lottery_id);
-
-        if( null == $lottery || $lottery->is_winned != 1 ){
-            return ['ret'=>1003,'msg'=>['error'=>'您并没有中奖，无法填写信息~']];
-        }
-        elseif( $lottery->is_booked == 1 ){
-            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
-        }
-        elseif( $lottery->is_invalid == 1 ){
-            return ['ret'=>1004, 'msg'=>['error'=>'抽奖信息已失效~']];
+        if( null == $lottery_id){
+            return ['ret'=>1002,'msg'=>['error'=>'您并未中奖']];
         }
         $messages = [
             'name.required' => '请正确输入姓名',
@@ -73,88 +62,95 @@ class HomeController extends Controller
 
         \DB::beginTransaction();
         try {
-            $count_plate_number = \App\Form::where('plate_number',$request->input('plate_number'))->count();
-            if( $count_plate_number > 0){
-                \DB::commit();
-                return ['ret'=>1007,'msg'=>['plate_number'=>'该车牌号码已经被使用过了。']];
-            }
-
-            $count = \App\Form::where('mobile',$request->input('mobile'))->count();
-            if( $count > 0){
-                \DB::commit();
-                return ['ret'=>1002,'msg'=>['mobile'=>'该手机号码已获得过免费换机油服务，请更换手机号码重新参与活动。']];
-            }
-
+            $count_plate_number = \App\Form::where('plate_number',$request->input('plate_number'))->lockForUpdate()->count();
+            $count = \App\Form::where('mobile',$request->input('mobile'))->lockForUpdate()->count();
             $shop = \App\Shop::find($request->input('shop'));
             $province = $shop->province;
-            if( null == $shop || $province->booked_limit_num <= $province->booked_num ){
-                \DB::commit();
-                return ['ret'=>1005, 'msg'=>['shop'=>'该门店已经无法预约了']];
-            }
-            $count = \App\Form::where('shop_id',$request->input('shop'))
+            $count_shop = \App\Form::where('shop_id',$request->input('shop'))
                 ->where('booking_date',$request->input('booking_date'))
+                ->lockForUpdate()
                 ->count();
-            //门店限制
-            if( $count >= $shop->booked_limit_num ){
-                \DB::commit();
-                return ['ret'=>1006, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
+            $lottery = \App\Lottery::find($lottery_id);
+            if( null == $lottery || $lottery->is_winned != 1 ){
+                $return = ['ret'=>1003,'msg'=>['error'=>'您并没有中奖，无法填写信息~']];
             }
-            $form = new \App\Form;
-            $form->lottery_id = $lottery_id;
-            $form->name = $request->input('name');
-            $form->mobile = $request->input('mobile');
-            $form->plate_number = $request->input('plate_number');
-            $form->shop_id = $request->input('shop');
-            $form->oil_info = $request->input('oil_info');
-            $form->booking_date = $request->input('booking_date');
-            $form->sex = $request->input('sex');
-            $form->source_from = \Agent::isMobile() ? 'mobile' : 'pc';
-            $form->save();
-            $lottery->is_booked = 1;
-            $lottery->save();
-
-
-            $data = $form->toArray();
-            $data['shop_name'] = $shop->name;
-            $data['address'] = $shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address;
-
-            $file = 'qr/'.$form->id.'.svg';
-            $path = public_path($file);
-            $content = url('/coupon',['id'=>$form->id,'key'=>substr(md5($form->mobile),5,17)]);
-            \QrCode::size(600)->margin(0)->generate($content, $path);
-            $data['qr_code'] = url($file);
-            //发送短信
-            //用户短信
-            $msg_mobile = $form->mobile;
-            $form_url = url('/coupon',[
-                'id' => $form->id,
-                'key' => substr(md5($form->mobile),5,17),
-            ]);
-            $msg_content = '感谢您参与普利司通春季促销活动，您已成功预约免费更换机油服务。预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$data['address'].'），您的预约码请点击以下地址查看：'.$form_url.'，请您务必在预约日期当天前往预约门店更换机油，逾期作废。';
-            $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
-            file_get_contents($url);
-            //店铺短信
-            if( env('APP_ENV') == 'dev' ){
-                $msg_mobile = '15618892632';
-                //$msg_mobile = '13816214832';
+            elseif( $lottery->is_booked == 1 ){
+                $return = ['ret'=>1008, 'msg'=>['error'=>'抽奖信息已失效~']];
+            }
+            elseif( $lottery->is_invalid == 1 ){
+                $return = ['ret'=>1009, 'msg'=>['error'=>'抽奖信息已失效~']];
+            }
+            elseif( $count_plate_number > 0){
+                $return = ['ret'=>1007,'msg'=>['plate_number'=>'该车牌号码已经被使用过了。']];
+            }
+            elseif( $count > 0){
+                $return = ['ret'=>1002,'msg'=>['mobile'=>'该手机号码已获得过免费换机油服务，请更换手机号码重新参与活动。']];
+            }
+            elseif( null == $shop || $province->booked_limit_num <= $province->booked_num ){
+                $return = ['ret'=>1005, 'msg'=>['shop'=>'该门店已经无法预约了']];
+            }
+            elseif( $count_shop >= $shop->booked_limit_num ){
+                $return = ['ret'=>1006, 'msg'=>['shop'=>'该门店当天的预约数已满了']];
             }
             else{
-                $msg_mobile = $shop->contact_mobile;
+                $form = new \App\Form;
+                $form->lottery_id = $lottery_id;
+                $form->name = $request->input('name');
+                $form->mobile = $request->input('mobile');
+                $form->plate_number = $request->input('plate_number');
+                $form->shop_id = $request->input('shop');
+                $form->oil_info = $request->input('oil_info');
+                $form->booking_date = $request->input('booking_date');
+                $form->sex = $request->input('sex');
+                $form->source_from = \Agent::isMobile() ? 'mobile' : 'pc';
+                $form->save();
+                $lottery->is_booked = 1;
+                $lottery->save();
+
+
+                $data = $form->toArray();
+                $data['shop_name'] = $shop->name;
+                $data['address'] = $shop->province->name.' '.$shop->city->name.' '.$shop->area->name.' '.$shop->address;
+
+                $file = 'qr/'.$form->id.'.svg';
+                $path = public_path($file);
+                $content = url('/coupon',['id'=>$form->id,'key'=>substr(md5($form->mobile),5,17)]);
+                \QrCode::size(600)->margin(0)->generate($content, $path);
+                $data['qr_code'] = url($file);
+                //发送短信
+                //用户短信
+                $msg_mobile = $form->mobile;
+                $form_url = url('/coupon',[
+                    'id' => $form->id,
+                    'key' => substr(md5($form->mobile),5,17),
+                ]);
+                $msg_content = '感谢您参与普利司通春季促销活动，您已成功预约免费更换机油服务。预约姓名：'.$form->name.'，预约时间：'.$form->booking_date.'，预约店铺：'.$shop->name.'（'.$data['address'].'），您的预约码请点击以下地址查看：'.$form_url.'，请您务必在预约日期当天前往预约门店更换机油，逾期作废。';
+                $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
+                file_get_contents($url);
+                //店铺短信
+                if( env('APP_ENV') == 'dev' ){
+                    $msg_mobile = '15618892632';
+                    //$msg_mobile = '13816214832';
+                }
+                else{
+                    $msg_mobile = $shop->contact_mobile;
+                }
+                $shop_url = url('/flow',[
+                    'id' => $form->shop_id,
+                    'key' => substr(md5($shop->contact_mobile),5,17),
+                ]);
+                $msg_content = '您好，'.$form->booking_date.'将有1位手机尾号为：'.substr($form->mobile,-4).'的用户光顾车之翼（'.$shop->name.'）店铺体验更换机油服务（'.$form->oil_info.'），请在用户到店后按此步骤操作：第一步：打开此链（'.$shop_url.'）；第二步：截图保存页面上的二维码；第三步：打开微信，在微信右上角的扫一扫中，打开相册扫描二维码；第四步，进入核销页面后扫描顾客提供的二维码进行核销；谢谢。';
+                $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
+                file_get_contents($url);
+                $province->booked_num += 1;
+                $province->save();
+                $request->session()->put('has_winned', null);
+                $request->session()->put('lottery.id', null);
+                $return = ['ret'=>0, 'msg'=>'','data'=>$data];
             }
-            $shop_url = url('/flow',[
-                'id' => $form->shop_id,
-                'key' => substr(md5($shop->contact_mobile),5,17),
-            ]);
-            $msg_content = '您好，'.$form->booking_date.'将有1位手机尾号为：'.substr($form->mobile,-4).'的用户光顾车之翼（'.$shop->name.'）店铺体验更换机油服务（'.$form->oil_info.'），请在用户到店后按此步骤操作：第一步：打开此链（'.$shop_url.'）；第二步：截图保存页面上的二维码；第三步：打开微信，在微信右上角的扫一扫中，打开相册扫描二维码；第四步，进入核销页面后扫描顾客提供的二维码进行核销；谢谢。';
-            $url = 'http://sms.zbwin.mobi/ws/sendsms.ashx?uid='.env('MSG_ID').'&pass='.env('MSG_KEY').'&mobile='.$msg_mobile.'&content='.urlencode($msg_content);
-            file_get_contents($url);
-            $province->booked_num += 1;
-            $province->save();
-            $request->session()->put('has_winned', null);
-            $request->session()->put('lottery.id', null);
             \DB::commit();
-            return ['ret'=>0, 'msg'=>'','data'=>$data];
-        } catch (Exception $e) {
+            return $return;
+        } catch (\Throwable $e) {
             \DB::rollBack();
             return ['ret'=>1100, 'msg'=>['error'=>$e->getMessage()]];
         }
