@@ -234,19 +234,20 @@ class HomeController extends Controller
         $return = json_decode(file_get_contents($url));
         $province = \App\Province::where('name', $return->data->region)->first();
         if($province == null || $province->booked_limit_num <= $province->booked_num){
-            return ['ret'=>1010,'msg'=>'未中奖'];
+            //return ['ret'=>1010,'msg'=>'未中奖'];
         }
 
         $now = \Carbon\Carbon::now();
 
         \DB::beginTransaction();
         try{
+            $ip_count = \App\Lottery::where('created_ip',$request->ip())->where('is_winned',1)->lockForUpdate()->count();
             $total_setting = \App\LotterySetting::whereNull('lottery_date')->first();
             $today_setting = \App\LotterySetting::where('lottery_date', $now->toDateString())->first();
 
             $lottery = new \App\Lottery;
             $lottery->is_winned = 0;
-            if( null == $total_setting || null == $today_setting ){
+            if( null == $total_setting || null == $today_setting || $ip_count > 0){
                 $return = ['ret'=>1001,'msg'=>'未中奖'];
             }
             elseif( $total_setting->max_num <= $total_setting->winned_num ){

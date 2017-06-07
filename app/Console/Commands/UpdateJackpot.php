@@ -38,7 +38,6 @@ class UpdateJackpot extends Command
     public function handle()
     {
         $now = \Carbon\Carbon::now();
-        //$now = new \Carbon\Carbon();
         \DB::beginTransaction();
         try{
             #超过30分钟未填写的抽奖记录返还奖池
@@ -68,7 +67,7 @@ class UpdateJackpot extends Command
             $amount_failure = \App\Lottery::where('is_winned',1)
                 ->where('is_booked', 1)
                 ->where('is_received',0)
-                ->where('created_at', '<', $now->copy()->subDays(14)->toDateTimeString())
+                ->where('created_at', '<', $now->copy()->subDays(14)->toDateString())
                 ->where('is_invalid', 0)
                 ->count();
             $total_setting->winned_num -= ($count + $amount_failure);
@@ -77,7 +76,7 @@ class UpdateJackpot extends Command
             \App\Lottery::where('is_winned',1)
                 ->where('is_booked', 1)
                 ->where('is_received',0)
-                ->where('created_at', '<', $now->copy()->subDays(14)->toDateTimeString())
+                ->where('created_at', '<', $now->copy()->subDays(14)->toDateString())
                 ->where('is_invalid', 0)
                 ->update(['is_invalid' => 1]);
 
