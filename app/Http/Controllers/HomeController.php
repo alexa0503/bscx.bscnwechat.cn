@@ -326,7 +326,7 @@ class HomeController extends Controller
         }
         elseif( $form->lottery->is_invalid == 1 ){
             //该领奖券已经失效
-            return ['ret'=>1005];
+            //return ['ret'=>1005];
             $hx_class = 'hx_fault';
             $ret = 1005;
         }
