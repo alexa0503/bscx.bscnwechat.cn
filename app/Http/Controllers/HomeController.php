@@ -242,8 +242,8 @@ class HomeController extends Controller
         \DB::beginTransaction();
         try{
             $ip_count = \App\Lottery::where('created_ip',$request->ip())->where('is_winned',1)->lockForUpdate()->count();
-            $total_setting = \App\LotterySetting::whereNull('lottery_date')->first();
-            $today_setting = \App\LotterySetting::where('lottery_date', $now->toDateString())->first();
+            $total_setting = \App\LotterySetting::whereNull('lottery_date')->lockForUpdate()->first();
+            $today_setting = \App\LotterySetting::where('lottery_date', $now->toDateString())->lockForUpdate()->first();
 
             $lottery = new \App\Lottery;
             $lottery->is_winned = 0;
