@@ -31,7 +31,7 @@
                     @endforeach
 		      	</tbody>
 		    </table>
-            {!! $items->links() !!}
+            {!! $items->appends(['is_winned'=>Request::get('is_winned')])->links() !!}
 		</div>
 	</div><!-- ./smart-widget-inner -->
 </div>
