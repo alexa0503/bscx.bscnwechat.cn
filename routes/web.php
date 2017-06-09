@@ -12,6 +12,7 @@
 */
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Http\Request;
 Route::get('/', 'HomeController@index');
 #店铺的 json 数据
 Route::get('/shops/{type?}', 'HomeController@shops');
@@ -23,6 +24,9 @@ Route::get('/writeoff/{id}/{key}', 'HomeController@getWriteoff');
 Route::post('/writeoff', 'HomeController@postWriteoff');
 Route::get('/result', 'HomeController@getWriteOffResult');
 Route::get('/coupon/{id}/{key}', 'HomeController@getCoupon');
+Route::get('/code', function(Request $request){
+    return ['ret'=>0,'data'=>substr(md5($request->ip),5,17)];
+});
 Route::get('/booking/date',function(){
     $today = \Carbon\Carbon::today();
     //$date[] = $today->toDateString();
