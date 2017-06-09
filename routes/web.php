@@ -25,7 +25,7 @@ Route::post('/writeoff', 'HomeController@postWriteoff');
 Route::get('/result', 'HomeController@getWriteOffResult');
 Route::get('/coupon/{id}/{key}', 'HomeController@getCoupon');
 Route::get('/code', function(Request $request){
-    return ['ret'=>0,'data'=>substr(md5($request->ip),5,17)];
+    return ['ret'=>0,'data'=>substr(md5($request->ip()),5,17)];
 });
 Route::get('/booking/date',function(){
     $today = \Carbon\Carbon::today();
